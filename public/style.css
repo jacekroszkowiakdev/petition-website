@@ -1,42 +1,7 @@
-/* * {
+* {
     box-sizing: border-box;
     margin: 0;
     background-color: azure;
-} */
-
-.project {
-    width: 350px;
-    height: 350px;
-    border: cadetblue 3px;
-    border-radius: 10%;
-    object-fit: cover;
-    overflow: hidden;
-}
-
-.about {
-    width: 100vw;
-    height: 500px;
-}
-
-.button {
-    text-decoration: none;
-    color: initial;
-    height: 35px;
-    width: 50px;
-}
-
-.screenshot {
-    width: 250px;
-    height: 250px;
-    border-radius: 50%;
-    object-fit: cover;
-    overflow: hidden;
-}
-
-.project_list {
-    width: 250px;
-    height: 500px;
-    float: left;
 }
 
 footer {
