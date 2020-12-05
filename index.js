@@ -8,11 +8,11 @@ const db = require("./db");
 app.use(require("cookie-parser")());
 app.use(express.static("./public"));
 app.use(express.urlencoded({ extended: false }));
+
 // template rendering engine
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 
-// what this does exactly?
 app.use((req, res, next) => {
     console.log("-----------------");
     console.log(`${req.method} request coming in on route ${req.url}`);
@@ -34,7 +34,7 @@ app.get("/petition", (req, res) => {
 // 2 POST /petition
 app.post("/petition", (req, res) => {
     console.log("POST request was made - signature submitted");
-    res.cookie("authenticated", true);
+    // res.cookie("authenticated", true);
     const { first, last, signature } = req.body;
     db.addSignature(first, last, "asdasdaas")
         .then(() => {
@@ -49,9 +49,14 @@ app.post("/petition", (req, res) => {
 // 3 GET /thanks
 app.get("/thanks", (req, res) => {
     if (req.cookies.signed === "true") {
-        console.log("GET route to thank you page");
-        res.render("thanks", {
-            title: "Thank you",
+        db.getSignatoriesNumber().then(({ rows }) => {
+            console.log("GET route to thank you page");
+            res.render("thanks", {
+                title: "Thank you",
+                rows,
+            }).catch((err) => {
+                console.log("error reading signatories number form DB : ", err);
+            });
         });
     } else res.redirect("/petition");
 });
@@ -59,31 +64,16 @@ app.get("/thanks", (req, res) => {
 // 4 GET /signers
 app.get("/signers", (req, res) => {
     if (req.cookies.signed === "true") {
-        // SELECT first and last values of every person that has signed from
-        // the database and pass them to signers.handlebars
-        db.getSignatories(first, last).then(({ rows }) => {
-            console.log("signatories read from DB successful", rows);
+        db.getSignatories().then(({ rows }) => {
+            console.log("signatories read from DB successful", { rows });
             res.render("signers", {
                 title: "Petition signatories",
+                rows,
             }).catch((err) => {
-                console.log("error reading singatories form DB : ", err);
+                console.log("error reading signatories form DB : ", err);
             });
         });
-
-        // SELECT the number of people that have signed the petition from the db →
-        // I recommend looking into what COUNT can do for you here ;)
     } else res.redirect("/petition");
-});
-
-app.get("/cities", (req, res) => {
-    db.getCities()
-        .then(({ rows }) => {
-            console.log("result from getCities:", rows);
-            res.sendStatus(200);
-        })
-        .catch((err) => {
-            console.log("error in db.getCities", err);
-        });
 });
 
 app.listen(8080, () =>

@@ -1,2 +1,8 @@
-<h1>Thanks to all who already support our case!</h1>
-{{!-- here a list of folks who signed off will appear --}}
+<h1>`Thanks to all {{getSignatoriesNumber}} people who already support our case!`</h1>
+
+    <ul>
+        {{#rows}}
+                <li>`{{this.first}} {{this.last}}`</li>
+        {{/rows}}
+    </ul>
+
