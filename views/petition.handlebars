@@ -1,12 +1,17 @@
 <h1>Welcome to our petition main page. NO IDEA WHAT IT WILL BE YET BUT STAY TUNED</h1>
-<form method="POST" style="display: flex; flex-direction: column; justify-content: space-between; width: 40%; height: 50%;">
+<form method="POST">
     <h1>Welcome to my petition project</h1>
     <div>
         <label for="first">First Name</label><br>
         <input type="text" name="first" id="first" required><br>
         <label for="last">Last Name</label><br>
-        <input type="text" name="last" id="last" required>
-        <button> Submit </submit>
+        <input type="text" name="last" id="last" required><br>
+        <input id="signature" type="hidden" name="signature"><br>
+        <label for="signature">Use mouse to sign below:</label><br>
+        <canvas id='canvas' width='400' height='150' style="border:2px solid"></canvas><br>
+
+        <button> Submit </button>
+
     </div>
 
 </form>
