@@ -26,8 +26,8 @@
         canvas.addEventListener("mouseup", () => {
             flag = false;
             dataURL = canvas.toDataURL();
-            signature = dataURL;
-            console.log("signature: ", signature);
+            signature.value = dataURL;
+            console.log("signature.value: ", signature.value);
         });
     });
 })();

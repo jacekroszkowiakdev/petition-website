@@ -1,7 +1,6 @@
 const express = require("express");
 const app = express();
 const cookieParser = require("cookie-parser");
-// const cookie = require("cookie");
 const hb = require("express-handlebars");
 const db = require("./db");
 const cookieSession = require("cookie-session");
@@ -41,11 +40,10 @@ app.post("/petition", (req, res) => {
     console.log("POST request was made - signature submitted");
     const { first, last, signature } = req.body;
     console.log("req.session: ", req.session);
-
-    db.addSignature(first, last, signature)
+    db.addSignature(first, last, signature, req.session.userId)
         .then(({ rows }) => {
             req.session.signed = true;
-            req.session.id = rows[0].id;
+            req.session.userId = rows[0].id; // saves id of row into session ...
             console.log("req.session after setting ID: ", req.session);
             res.redirect("/thanks");
         })
@@ -55,47 +53,54 @@ app.post("/petition", (req, res) => {
 });
 
 // 3 GET /thanks
-// use  Promise.all([promise1, promise2, promise3]).then((values) => {
-//   console.log(values);
-//   });
-
-// app.get("/thanks", req, res) => {
-//     if (req.session.signed !== true) {
-//         res.redirect("/petition");
-//     } else Promise.all([db.getSignaturePic(), db.getSignatoriesNumber()].then((rows)) => {
-//         const signature = rows[0].signature;
-//         const count = rows[0].count;
-//             res.render("thanks", {
-//                 title: "Thank you",
-//                 count,
-//             }).catch((err) => {
-//                 console.log("error reading signatories number form DB : ", err);
-//             });
-//     });
-// });
 
 app.get("/thanks", (req, res) => {
     if (req.session.signed !== true) {
         res.redirect("/petition");
-    } else
-        db.getSignaturePic(req.session.id).then(({ rows }) => {
-            console.log("rows", rows[0]);
-            const signature = rows[0].signature;
-            db.getSignatoriesNumber().then(({ rows }) => {
-                const count = rows[0].count;
+    } else {
+        return Promise.all([
+            db.getSignaturePic(req.session.userId),
+            db.getSignatoriesNumber(),
+        ])
+            .then((rows) => {
                 res.render("thanks", {
                     title: "Thank you",
-                    count,
-                    signature,
-                }).catch((err) => {
-                    console.log(
-                        "error reading signatories number form DB : ",
-                        err
-                    );
+                    signature: rows[0].signature,
+                    count: rows[0].count,
                 });
+            })
+            .catch((err) => {
+                console.log("error reading data from DB : ", err);
             });
-        });
+    }
 });
+
+// app.get("/thanks", (req, res) => {
+//     if (req.session.signed !== true) {
+//         res.redirect("/petition");
+//     } else
+//         db.getSignaturePic(req.session.id)
+//             .then(({ rows }) => {
+//                 console.log("rows", rows[0]);
+//                 // const signature = rows[0].signature;
+//                 db.getSignatoriesNumber().then(({ rows }) => {
+//                     const count = rows[0].count;
+//                     res.render("thanks", {
+//                         title: "Thank you",
+//                         count,
+//                         signature,
+//                     }).catch((err) => {
+//                         console.log(
+//                             "error reading signatories number form DB : ",
+//                             err
+//                         );
+//                     });
+//                 });
+//             })
+//             .catch((err) => {
+//                 console.log("error reading signature pic from DB : ", err);
+//             });
+// });
 
 // 4 GET /signers
 app.get("/signers", (req, res) => {
