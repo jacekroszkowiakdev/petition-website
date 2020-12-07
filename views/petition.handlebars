@@ -6,6 +6,7 @@
         <input type="text" name="first" id="first" required><br>
         <label for="last">Last Name</label><br>
         <input type="text" name="last" id="last" required><br>
+        <input type="hidden" name="_csrf" value="{{csrfToken}}">
         <input id="signature" type="hidden" name="signature"><br>
         <label for="signature">Use mouse to sign below:</label><br>
         <canvas id='canvas' width='400' height='150' style="border:2px solid"></canvas><br>

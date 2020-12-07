@@ -19,7 +19,7 @@ module.exports.getSignatories = () => {
 };
 
 module.exports.getSignatoriesNumber = () => {
-    return db.query("SELECT COUNT * FROM  signatures");
+    return db.query("SELECT COUNT (*) FROM  signatures");
 };
 
 module.exports.getSignaturePic = (userId) => {

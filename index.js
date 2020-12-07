@@ -4,6 +4,8 @@ const cookieParser = require("cookie-parser");
 const hb = require("express-handlebars");
 const db = require("./db");
 const cookieSession = require("cookie-session");
+const csurf = require("csurf");
+const frameguard = require("frameguard");
 
 app.use(
     cookieSession({
@@ -13,6 +15,14 @@ app.use(
 );
 app.use(express.static("./public"));
 app.use(express.urlencoded({ extended: false }));
+
+app.use(csurf());
+app.use(function (req, res, next) {
+    res.set("x-frame-options", "DENY");
+    res.locals.csrfToken = req.csrfToken();
+    frameguard({ action: "SAMEORIGIN" });
+    next();
+});
 
 // template rendering engine
 app.engine("handlebars", hb());
