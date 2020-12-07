@@ -8,7 +8,7 @@ const cookieSession = require("cookie-session");
 
 app.use(
     cookieSession({
-        secret: `Grzegorz Brzęczyszcykiewicz`,
+        secret: `Grzegorz Brzęczyszczykiewicz`,
         maxAge: 1000 * 60 * 60 * 24 * 14,
     })
 );
@@ -42,7 +42,7 @@ app.post("/petition", (req, res) => {
     const { first, last, signature } = req.body;
     console.log("req.session: ", req.session);
 
-    db.addSignature(first, last, "signature")
+    db.addSignature(first, last, signature)
         .then(({ rows }) => {
             req.session.signed = true;
             req.session.id = rows[0].id;

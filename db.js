@@ -9,6 +9,7 @@ module.exports.addSignature = (firstName, lastName, signature) => {
     const q = `INSERT INTO signatures (first, last, signature)
     VALUES ($1 , $2 , $3 )`;
     const params = [firstName, lastName, signature];
+    console.log("input is: ", params);
     console.log("record added");
     return db.query(q, params);
 };
