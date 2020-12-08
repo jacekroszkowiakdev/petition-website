@@ -72,11 +72,14 @@ app.get("/thanks", (req, res) => {
             db.getSignaturePic(req.session.userId),
             db.getSignatoriesNumber(),
         ])
-            .then((rows) => {
+            .then((result) => {
+                let signature = result[0].rows[0].signature;
+                let count = result[1].rows[0].count;
+
                 res.render("thanks", {
-                    title: "Thank you",
-                    signature: rows[0].signature,
-                    count: rows[0].count,
+                    title: "Thank you for signing",
+                    count,
+                    signature,
                 });
             })
             .catch((err) => {
