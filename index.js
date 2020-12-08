@@ -35,10 +35,42 @@ app.use((req, res, next) => {
     next();
 });
 
+// GET /register
+app.get("/register", (req, res) => {
+    if (req.session.userId !== true) {
+        console.log(`user is requesting GET / route from "/petition"`);
+        res.render("registration", {
+            title: "register",
+        });
+    } else res.redirect("/login");
+});
+
+// POST /register
+app.post("/register", (req, res) => {
+    const { first, last, email, password } = req.body;
+    console.log("register body: ", req.body);
+    db.addCredentials(first, last, email, password, req.session.userId)
+        .then(({ rows }) => {
+            req.session.userId = rows[0].id;
+            req.session.registered = true;
+            res.redirect("/petition");
+        })
+        .catch((err) => {
+            console.log("error creating user profile", err);
+        });
+});
+
+
+//GET /login
+app.get("/login", (req, res) => {
+    if
+});
+
+
 // GET /petition
 app.get("/petition", (req, res) => {
     if (req.session.signed !== true) {
-        console.log(`user is requesting GET / route from "/"`);
+        console.log(`user is requesting GET / route from "/petition"`);
         res.render("petition", {
             title: "Welcome to my petition",
         });
@@ -48,22 +80,22 @@ app.get("/petition", (req, res) => {
 // 2 POST /petition
 app.post("/petition", (req, res) => {
     console.log("POST request was made - signature submitted");
-    const { first, last, signature } = req.body;
+    const { signature } = req.body;
+    console.log("signature from DB: ", signature);
     console.log("req.session: ", req.session);
-    db.addSignature(first, last, signature, req.session.userId)
+    db.addSignature(signature, req.session.userId) // change userID here to something else sessionId?
         .then(({ rows }) => {
             req.session.signed = true;
-            req.session.userId = rows[0].id; // saves id of row into session ...
+            req.session.signatureId = rows[0].id; // saves id of row into session ...
             console.log("req.session after setting ID: ", req.session);
             res.redirect("/thanks");
         })
         .catch((err) => {
-            console.log("error writing to DataBase: ", err);
+            console.log("POST/petition error writing to DataBase: ", err);
         });
 });
 
 // 3 GET /thanks
-
 app.get("/thanks", (req, res) => {
     if (req.session.signed !== true) {
         res.redirect("/petition");
@@ -74,8 +106,9 @@ app.get("/thanks", (req, res) => {
         ])
             .then((result) => {
                 let signature = result[0].rows[0].signature;
+                console.log("signature from DB: ", signature);
                 let count = result[1].rows[0].count;
-
+                console.log("count :", count);
                 res.render("thanks", {
                     title: "Thank you for signing",
                     count,
@@ -87,33 +120,6 @@ app.get("/thanks", (req, res) => {
             });
     }
 });
-
-// app.get("/thanks", (req, res) => {
-//     if (req.session.signed !== true) {
-//         res.redirect("/petition");
-//     } else
-//         db.getSignaturePic(req.session.id)
-//             .then(({ rows }) => {
-//                 console.log("rows", rows[0]);
-//                 // const signature = rows[0].signature;
-//                 db.getSignatoriesNumber().then(({ rows }) => {
-//                     const count = rows[0].count;
-//                     res.render("thanks", {
-//                         title: "Thank you",
-//                         count,
-//                         signature,
-//                     }).catch((err) => {
-//                         console.log(
-//                             "error reading signatories number form DB : ",
-//                             err
-//                         );
-//                     });
-//                 });
-//             })
-//             .catch((err) => {
-//                 console.log("error reading signature pic from DB : ", err);
-//             });
-// });
 
 // 4 GET /signers
 app.get("/signers", (req, res) => {
