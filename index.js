@@ -1,11 +1,10 @@
 const express = require("express");
 const app = express();
-const cookieParser = require("cookie-parser");
 const hb = require("express-handlebars");
 const db = require("./db");
 const cookieSession = require("cookie-session");
 const { hash, compare } = require("./bc");
-// const csurf = require("csurf");
+const csurf = require("csurf");
 const frameguard = require("frameguard");
 
 // Middleware:
@@ -19,10 +18,10 @@ app.use(
 app.use(express.static("./public"));
 app.use(express.urlencoded({ extended: false }));
 
-// app.use(csurf());
+app.use(csurf());
 app.use(function (req, res, next) {
     res.set("x-frame-options", "DENY");
-    // res.locals.csrfToken = req.csrfToken();
+    res.locals.csrfToken = req.csrfToken();
     frameguard({ action: "SAMEORIGIN" });
     next();
 });
@@ -39,6 +38,12 @@ app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 
 // Routes:
+
+// GET "/"
+app.get("/", (req, res) => {
+    res.redirect("/register");
+});
+
 // GET /register
 app.get("/register", (req, res) => {
     if (req.session.userId !== true) {
@@ -139,6 +144,7 @@ app.get("/logout", (req, res) => {
     });
 });
 
+//POST /logout
 app.post("/logout", (req, res) => {
     console.log("User has logged out");
     req.session = null;
@@ -146,12 +152,14 @@ app.post("/logout", (req, res) => {
 
 // GET /petition
 app.get("/petition", (req, res) => {
-    if (req.session.signed !== true) {
-        console.log(`user is requesting GET / route from "/petition"`);
-        res.render("petition", {
-            title: "Welcome to my petition",
-        });
-    } else res.redirect("/thanks");
+    if (typeof req.session.userId === "number") {
+        if (req.session.signatureId !== true) {
+            console.log(`user is requesting GET / route from "/petition"`);
+            res.render("petition", {
+                title: "Welcome to my petition",
+            });
+        } else res.redirect("/thanks");
+    } else res.redirect("/login");
 });
 
 // 2 POST /petition
@@ -162,7 +170,7 @@ app.post("/petition", (req, res) => {
     // console.log("req.session: ", req.session);
     db.addSignature(signature, req.session.userId)
         .then(({ rows }) => {
-            req.session.signed = true;
+            // req.session.signed = true;
             req.session.signatureId = rows[0].id;
             // console.log("req.session after setting ID: ", req.session);
             res.redirect("/thanks");
@@ -174,7 +182,8 @@ app.post("/petition", (req, res) => {
 
 // 3 GET /thanks
 app.get("/thanks", (req, res) => {
-    if (req.session.signed !== true) {
+    // if (req.session.signed !== true) {
+    if (typeof req.session.signatureId !== "number") {
         res.redirect("/petition");
     } else {
         return Promise.all([
@@ -200,7 +209,8 @@ app.get("/thanks", (req, res) => {
 
 // 4 GET /signers
 app.get("/signers", (req, res) => {
-    if (req.session.signed !== true) {
+    // if (req.session.signed !== true) {
+    if (typeof req.session.signatureId !== "number") {
         res.redirect("/petition");
     } else
         db.getSignatories().then(({ rows }) => {
