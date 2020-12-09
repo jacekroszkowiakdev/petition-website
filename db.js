@@ -18,10 +18,6 @@ module.exports.addSignature = (signature, userId) => {
     return db.query(q, params);
 };
 
-module.exports.getSignatories = () => {
-    return db.query("SELECT first, last FROM users");
-};
-
 module.exports.getSignatoriesNumber = () => {
     return db.query("SELECT COUNT (*) FROM  signatures");
 };
@@ -40,6 +36,10 @@ module.exports.addCredentials = (first, last, email, hashedPassword) => {
     return db.query(q, params);
 };
 
+module.exports.getSignatories = () => {
+    return db.query("SELECT first, last FROM users");
+};
+
 module.exports.checkForUserEmail = (email) => {
     return db.query("SELECT password FROM users WHERE id = ($1)", [email]);
 };
@@ -48,4 +48,12 @@ module.exports.checkForUserSignature = (userId) => {
     return db.query("SELECT signature FROM signatures WHERE user_id = ($1)", [
         userId,
     ]);
+};
+
+//user_profiles table:
+module.exports.addProfile = (age, city, homepage) => {
+    const q = `INSERT INTO user_profiles (age, city, homepage)
+    VALUES ($1, $2, $3) RETURNING profile`;
+    const params = [age, city, homepage];
+    return db.query(q, params);
 };

@@ -71,7 +71,7 @@ app.post("/register", (req, res) => {
                     console.log("New user added to table users");
                     req.session.userId = rows[0].id;
                     req.session.registered = true;
-                    res.redirect("/petition");
+                    res.redirect("/profile");
                 })
                 .catch((err) => {
                     console.log("error creating user profile", err);
@@ -90,6 +90,44 @@ app.post("/register", (req, res) => {
                     "You made an error while creating your user profile, please fill required fields again and submit to register",
             });
         });
+});
+
+// GET /profile
+app.get("/profile", (req, res) => {
+    console.log(`GET request on route "/profile"`);
+    res.render("profile", {
+        title: "profile",
+    });
+});
+
+//POST /profile
+app.post("/profile", (req, res) => {
+    console.log("POST request was made - user profile submitted");
+    const { age, city, homepage } = req.body;
+    //check if homepage starts with : 'http://' or 'https://
+    if (
+        homepage.startsWith("http://") ||
+        homepage.startsWith("https://") ||
+        homepage === ""
+    ) {
+        db.addProfile(age, city.toLowerCase(), homepage, req.session.userId)
+            .then(() => {
+                res.redirect("/petition");
+            })
+            .catch((err) => {
+                console.log("Profile write to DB failed", err);
+                res.render("profile", {
+                    title: "profile",
+                    message: "Something went wrong, please try again.",
+                });
+            });
+    } else {
+        res.render("profile", {
+            title: "profile",
+            message:
+                "Look at you, hacker: a pathetic creature of meat and bone...",
+        });
+    }
 });
 
 //GET /login
@@ -166,13 +204,9 @@ app.get("/petition", (req, res) => {
 app.post("/petition", (req, res) => {
     console.log("POST request was made - signature submitted");
     const { signature } = req.body;
-    // console.log("signature from DB: ", signature);
-    // console.log("req.session: ", req.session);
     db.addSignature(signature, req.session.userId)
         .then(({ rows }) => {
-            // req.session.signed = true;
             req.session.signatureId = rows[0].id;
-            // console.log("req.session after setting ID: ", req.session);
             res.redirect("/thanks");
         })
         .catch((err) => {
@@ -182,7 +216,6 @@ app.post("/petition", (req, res) => {
 
 // 3 GET /thanks
 app.get("/thanks", (req, res) => {
-    // if (req.session.signed !== true) {
     if (typeof req.session.signatureId !== "number") {
         res.redirect("/petition");
     } else {
@@ -192,9 +225,7 @@ app.get("/thanks", (req, res) => {
         ])
             .then((result) => {
                 let signature = result[0].rows[0].signature;
-                // console.log("signature from DB: ", signature);
                 let count = result[1].rows[0].count;
-                // console.log("count :", count);
                 res.render("thanks", {
                     title: "Thank you for signing",
                     count,
@@ -209,7 +240,6 @@ app.get("/thanks", (req, res) => {
 
 // 4 GET /signers
 app.get("/signers", (req, res) => {
-    // if (req.session.signed !== true) {
     if (typeof req.session.signatureId !== "number") {
         res.redirect("/petition");
     } else
