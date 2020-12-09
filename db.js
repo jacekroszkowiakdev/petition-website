@@ -30,9 +30,19 @@ module.exports.getSignaturePic = (signatureId) => {
 };
 
 // users table:
-module.exports.addCredentials = (first, last, email, password) => {
+module.exports.addCredentials = (first, last, email, hashedPassword) => {
     const q = `INSERT INTO users (first, last, email, password)
     VALUES ($1, $2, $3, $4) RETURNING id`;
-    const params = [first, last, email, password];
+    const params = [first, last, email, hashedPassword];
     return db.query(q, params);
+};
+
+module.exports.checkForUserEmail = (email) => {
+    return db.query("SELECT password FROM users WHERE id = ($1)", [email]);
+};
+
+module.exports.checkForUserSignature = (userId) => {
+    return db.query("SELECT signature FROM signatures WHERE user_id = ($1)", [
+        userId,
+    ]);
 };

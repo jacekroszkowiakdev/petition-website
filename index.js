@@ -4,29 +4,28 @@ const cookieParser = require("cookie-parser");
 const hb = require("express-handlebars");
 const db = require("./db");
 const cookieSession = require("cookie-session");
+const { hash, compare } = require("./bc");
 const csurf = require("csurf");
 const frameguard = require("frameguard");
 
+// Middleware:
 app.use(
     cookieSession({
         secret: `Grzegorz Brzęczyszczykiewicz`,
         maxAge: 1000 * 60 * 60 * 24 * 14,
     })
 );
+
 app.use(express.static("./public"));
 app.use(express.urlencoded({ extended: false }));
 
-app.use(csurf());
+// app.use(csurf());
 app.use(function (req, res, next) {
     res.set("x-frame-options", "DENY");
-    res.locals.csrfToken = req.csrfToken();
+    // res.locals.csrfToken = req.csrfToken();
     frameguard({ action: "SAMEORIGIN" });
     next();
 });
-
-// template rendering engine
-app.engine("handlebars", hb());
-app.set("view engine", "handlebars");
 
 app.use((req, res, next) => {
     console.log("-----------------");
@@ -35,6 +34,11 @@ app.use((req, res, next) => {
     next();
 });
 
+// template rendering engine
+app.engine("handlebars", hb());
+app.set("view engine", "handlebars");
+
+// Routes:
 // GET /register
 app.get("/register", (req, res) => {
     if (req.session.userId !== true) {
@@ -49,23 +53,83 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
     const { first, last, email, password } = req.body;
     console.log("register body: ", req.body);
-    db.addCredentials(first, last, email, password, req.session.userId)
-        .then(({ rows }) => {
-            req.session.userId = rows[0].id;
-            req.session.registered = true;
-            res.redirect("/petition");
+    hash(password)
+        .then((hashedPassword) => {
+            db.addCredentials(
+                first,
+                last,
+                email,
+                hashedPassword,
+                req.session.userId
+            )
+                .then(({ rows }) => {
+                    console.log("New user added to table users");
+                    req.session.userId = rows[0].id;
+                    req.session.registered = true;
+                    res.redirect("/petition");
+                })
+                .catch((err) => {
+                    console.log("error creating user profile", err);
+                    res.render("registration", {
+                        title: "register",
+                        message:
+                            "You made an error while creating your user profile, please fill required fields again and submit to register",
+                    });
+                });
         })
         .catch((err) => {
             console.log("error creating user profile", err);
+            res.render("registration", {
+                title: "register",
+                message:
+                    "You made an error while creating your user profile, please fill required fields again and submit to register",
+            });
         });
 });
 
-
 //GET /login
 app.get("/login", (req, res) => {
-    if
+    console.log(`GET request on route "/login"`);
+    res.render("login", {
+        title: "login",
+    });
 });
 
+//POST /login
+app.post("/login", (req, res) => {
+    const { email, password } = req.body;
+    db.checkForUserEmail(email)
+        .then(({ rows }) => {
+            compare(password, rows[0].password).then(({ result }) => {
+                if (result) {
+                    req.session.userId = rows[0].id;
+                    req.session.loggedIn = true;
+                    db.checkForUserSignature(rows[0].id)
+                        .then(({ rows }) => {
+                            if (rows.length > 0) {
+                                req.session.signatureId = rows[0].id;
+                                res.redirect("/thanks");
+                            } else res.redirect("/petition");
+                        })
+                        .catch((err) => {
+                            console.log("signature not in DB", err);
+                            res.render("login", {
+                                title: "login",
+                                message:
+                                    "You have entered incorrect login or password.",
+                            });
+                        });
+                }
+            });
+        })
+        .catch((err) => {
+            console.log("passwords don't match", err);
+            res.render("login", {
+                title: "login",
+                message: "You have entered incorrect login or password.",
+            });
+        });
+});
 
 // GET /petition
 app.get("/petition", (req, res) => {
@@ -81,13 +145,13 @@ app.get("/petition", (req, res) => {
 app.post("/petition", (req, res) => {
     console.log("POST request was made - signature submitted");
     const { signature } = req.body;
-    console.log("signature from DB: ", signature);
-    console.log("req.session: ", req.session);
-    db.addSignature(signature, req.session.userId) // change userID here to something else sessionId?
+    // console.log("signature from DB: ", signature);
+    // console.log("req.session: ", req.session);
+    db.addSignature(signature, req.session.userId)
         .then(({ rows }) => {
             req.session.signed = true;
-            req.session.signatureId = rows[0].id; // saves id of row into session ...
-            console.log("req.session after setting ID: ", req.session);
+            req.session.signatureId = rows[0].id;
+            // console.log("req.session after setting ID: ", req.session);
             res.redirect("/thanks");
         })
         .catch((err) => {
@@ -106,9 +170,9 @@ app.get("/thanks", (req, res) => {
         ])
             .then((result) => {
                 let signature = result[0].rows[0].signature;
-                console.log("signature from DB: ", signature);
+                // console.log("signature from DB: ", signature);
                 let count = result[1].rows[0].count;
-                console.log("count :", count);
+                // console.log("count :", count);
                 res.render("thanks", {
                     title: "Thank you for signing",
                     count,
