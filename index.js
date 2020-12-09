@@ -5,7 +5,7 @@ const hb = require("express-handlebars");
 const db = require("./db");
 const cookieSession = require("cookie-session");
 const { hash, compare } = require("./bc");
-const csurf = require("csurf");
+// const csurf = require("csurf");
 const frameguard = require("frameguard");
 
 // Middleware:
@@ -131,6 +131,19 @@ app.post("/login", (req, res) => {
         });
 });
 
+//GET /logout
+app.get("/logout", (req, res) => {
+    console.log("User redirected to logout");
+    res.render("logout", {
+        title: "logout",
+    });
+});
+
+app.post("/logout", (req, res) => {
+    console.log("User has logged out");
+    req.session = null;
+});
+
 // GET /petition
 app.get("/petition", (req, res) => {
     if (req.session.signed !== true) {
@@ -200,6 +213,6 @@ app.get("/signers", (req, res) => {
         });
 });
 
-app.listen(8080, () =>
+app.listen(process.env.PORT || 8080, () =>
     console.log("Petition test server listening on port 8080")
 );

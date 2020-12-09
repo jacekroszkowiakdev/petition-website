@@ -1,5 +1,8 @@
 const spicedPg = require("spiced-pg");
-const db = spicedPg("postgres:postgres:postgres@localhost:5432/petitiondb");
+const db = spicedPg(
+    process.env.DATABASE_URL ||
+        `postgres:postgres:postgres@localhost:5432/petitiondb`
+);
 //spicedPg("whoAreWeTalkingTo:whichDBUserWillRunMyCommands:theUserPasswordForOurDbUser@PostgrePort/nameOfDatabase")
 
 // The object that is returned from the call above has a single method, query, that you can use to query your database.
