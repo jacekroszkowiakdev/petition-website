@@ -8,6 +8,7 @@ const csurf = require("csurf");
 const frameguard = require("frameguard");
 
 // Middleware:
+
 app.use(
     cookieSession({
         secret: `Grzegorz Brzęczyszczykiewicz`,
@@ -94,15 +95,19 @@ app.post("/register", (req, res) => {
 
 // GET /profile
 app.get("/profile", (req, res) => {
-    console.log(`GET request on route "/profile"`);
-    res.render("profile", {
-        title: "profile",
-    });
+    if (typeof req.session.userId === "number") {
+        console.log(`GET request on route "/profile"`);
+        res.render("profile", {
+            title: "profile",
+        });
+    } else {
+        res.redirect("/register");
+    }
 });
 
 //POST /profile
 app.post("/profile", (req, res) => {
-    console.log("POST request was made - user profile submitted");
+    console.log("POST request was made. User profile submitted.");
     const { age, city, homepage } = req.body;
     //check if homepage starts with : 'http://' or 'https://
     if (
@@ -112,6 +117,7 @@ app.post("/profile", (req, res) => {
     ) {
         db.addProfile(age, city.toLowerCase(), homepage, req.session.userId)
             .then(() => {
+                console.log("User profile added do DB");
                 res.redirect("/petition");
             })
             .catch((err) => {
@@ -124,8 +130,7 @@ app.post("/profile", (req, res) => {
     } else {
         res.render("profile", {
             title: "profile",
-            message:
-                "Look at you, hacker: a pathetic creature of meat and bone...",
+            message: "Please fill the fields again",
         });
     }
 });
@@ -225,7 +230,9 @@ app.get("/thanks", (req, res) => {
         ])
             .then((result) => {
                 let signature = result[0].rows[0].signature;
+                console.log("signature: ", signature);
                 let count = result[1].rows[0].count;
+                console.log("total: ", count);
                 res.render("thanks", {
                     title: "Thank you for signing",
                     count,

@@ -21,10 +21,10 @@ DROP TABLE IF EXISTS users;
 
     CREATE TABLE user_profiles(
       id SERIAL PRIMARY KEY,
-      age INT,
+      age INTEGER,
       city VARCHAR(255),
       url VARCHAR(255),
-      user_id INT NOT NULL REFERENCES users(id)
+      user_id INTEGER NOT NULL REFERENCES users(id)
     );
 
 

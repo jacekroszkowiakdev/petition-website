@@ -14,12 +14,12 @@ module.exports.addSignature = (signature, userId) => {
     VALUES ($1, $2) RETURNING id`;
     const params = [signature, userId];
     console.log("input is: ", params);
-    console.log("record added");
+    console.log("Signature added");
     return db.query(q, params);
 };
 
 module.exports.getSignatoriesNumber = () => {
-    return db.query("SELECT COUNT (*) FROM  signatures");
+    return db.query("SELECT COUNT (id) FROM  signatures");
 };
 
 module.exports.getSignaturePic = (signatureId) => {
@@ -51,9 +51,10 @@ module.exports.checkForUserSignature = (userId) => {
 };
 
 //user_profiles table:
-module.exports.addProfile = (age, city, homepage) => {
-    const q = `INSERT INTO user_profiles (age, city, homepage)
-    VALUES ($1, $2, $3) RETURNING profile`;
-    const params = [age, city, homepage];
+module.exports.addProfile = (age, city, homepage, userId) => {
+    const q = `INSERT INTO user_profiles (age, city, url, user_id)
+    VALUES ($1, $2, $3, $4)`;
+    const params = [age, city, homepage, userId];
+    console.log("Profile added");
     return db.query(q, params);
 };
