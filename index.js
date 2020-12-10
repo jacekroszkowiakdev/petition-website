@@ -250,14 +250,16 @@ app.get("/signers", (req, res) => {
     if (typeof req.session.signatureId !== "number") {
         res.redirect("/petition");
     } else
-        db.getSignatories().then(({ rows }) => {
-            res.render("signers", {
-                title: "Petition signatories",
-                rows,
-            }).catch((err) => {
+        db.getSignatories()
+            .then(({ rows }) => {
+                res.render("signers", {
+                    title: "Petition signatories",
+                    rows,
+                });
+            })
+            .catch((err) => {
                 console.log("error reading signatories form DB : ", err);
             });
-        });
 });
 
 app.listen(process.env.PORT || 8080, () =>

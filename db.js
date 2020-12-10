@@ -36,8 +36,21 @@ module.exports.addCredentials = (first, last, email, hashedPassword) => {
     return db.query(q, params);
 };
 
+// module.exports.getSignatories = () => {
+// return db.query("SELECT first, last FROM users");
+// };
+
 module.exports.getSignatories = () => {
-    return db.query("SELECT first, last FROM users");
+    return db.query(
+        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures on users.id = signatures.user_id"
+    );
+};
+
+module.exports.getSignatoriesByCity = (city) => {
+    return db.query(
+        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures on users.id = signatures.user_id",
+        [city]
+    );
 };
 
 module.exports.checkForUserEmail = (email) => {
