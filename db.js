@@ -42,13 +42,13 @@ module.exports.addCredentials = (first, last, email, hashedPassword) => {
 
 module.exports.getSignatories = () => {
     return db.query(
-        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures on users.id = signatures.user_id"
+        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures ON users.id = signatures.user_id "
     );
 };
 
 module.exports.getSignatoriesByCity = (city) => {
     return db.query(
-        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures on users.id = signatures.user_id",
+        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures ON users.id = signatures.user_id WHERE city = LOWER($1)",
         [city]
     );
 };

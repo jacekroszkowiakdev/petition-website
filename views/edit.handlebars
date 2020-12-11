@@ -1,5 +1,4 @@
-<h1>We live in petition driven world. Wanna hang with the cool kids? Sign one now!</h1>
-<h2>To do so, you need to first to create an user account by filling and submitting a form below </h2>
+<h1>Edit your profile</h1>
 <form method="POST">
         <label for="first">First Name</label><br>
         <input type="text" name="first" id="first" required><br>
@@ -12,7 +11,17 @@
 
         <label for="password">Password</label><br>
         <input type="text" name="password" id="password" required><br>
+
+        <label for="age">Age</label><br>
+        <input type="text" name="age" id="age"><br>
+
+        <label for="city">City</label><br>
+        <input type="text" name="city" id="city"><br>
+
+        <label for="homepage">Homepage</label><br>
+        <input type="text" name="homepage" id="homepage"><br>
+
         <input type="hidden" name="_csrf" value="{{csrfToken}}">
 
-        <button> Sign up </button>
+        <button> Continue </button>
 </form>

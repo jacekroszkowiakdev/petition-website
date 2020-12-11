@@ -48,7 +48,7 @@ app.get("/", (req, res) => {
 // GET /register
 app.get("/register", (req, res) => {
     if (req.session.userId !== true) {
-        console.log(`user is requesting GET / route from "/petition"`);
+        // console.log(`user is requesting GET / route from "/petition"`);
         res.render("registration", {
             title: "register",
         });
@@ -96,7 +96,7 @@ app.post("/register", (req, res) => {
 // GET /profile
 app.get("/profile", (req, res) => {
     if (typeof req.session.userId === "number") {
-        console.log(`GET request on route "/profile"`);
+        // console.log(`GET request on route "/profile"`);
         res.render("profile", {
             title: "profile",
         });
@@ -107,9 +107,8 @@ app.get("/profile", (req, res) => {
 
 //POST /profile
 app.post("/profile", (req, res) => {
-    console.log("POST request was made. User profile submitted.");
+    // console.log("POST request was made. User profile submitted.");
     const { age, city, homepage } = req.body;
-    //check if homepage starts with : 'http://' or 'https://
     if (
         homepage.startsWith("http://") ||
         homepage.startsWith("https://") ||
@@ -133,6 +132,11 @@ app.post("/profile", (req, res) => {
             message: "Please fill the fields again",
         });
     }
+});
+
+// GET /edit
+app.get("/login", (req, res) => {
+    // console.log("GET request on route EDIT");
 });
 
 //GET /login
@@ -205,7 +209,7 @@ app.get("/petition", (req, res) => {
     } else res.redirect("/login");
 });
 
-// 2 POST /petition
+// POST /petition
 app.post("/petition", (req, res) => {
     console.log("POST request was made - signature submitted");
     const { signature } = req.body;
@@ -260,6 +264,26 @@ app.get("/signers", (req, res) => {
             .catch((err) => {
                 console.log("error reading signatories form DB : ", err);
             });
+});
+
+//GET signers//city
+app.get("/signers/:city", (req, res) => {
+    let city = req.params;
+    console.log("city :", city, req.params);
+
+    db.getSignatoriesByCity(city)
+        .then(({ rows }) => {
+            res.render("signers", {
+                title: "city.charAt(0).toUpperCase() + str.substring(1)",
+                city: "city.charAt(0).toUpperCase() + str.substring(1)",
+                // title: city,
+                // city: city,
+                rows,
+            });
+        })
+        .catch((err) => {
+            console.log("error reading signatories/cities form DB : ", err);
+        });
 });
 
 app.listen(process.env.PORT || 8080, () =>
