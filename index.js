@@ -48,7 +48,6 @@ app.get("/", (req, res) => {
 // GET /register
 app.get("/register", (req, res) => {
     if (req.session.userId !== true) {
-        // console.log(`user is requesting GET / route from "/petition"`);
         res.render("registration", {
             title: "register",
         });
@@ -96,7 +95,6 @@ app.post("/register", (req, res) => {
 // GET /profile
 app.get("/profile", (req, res) => {
     if (typeof req.session.userId === "number") {
-        // console.log(`GET request on route "/profile"`);
         res.render("profile", {
             title: "profile",
         });
@@ -107,7 +105,6 @@ app.get("/profile", (req, res) => {
 
 //POST /profile
 app.post("/profile", (req, res) => {
-    // console.log("POST request was made. User profile submitted.");
     const { age, city, homepage } = req.body;
     if (
         homepage.startsWith("http://") ||
@@ -135,13 +132,20 @@ app.post("/profile", (req, res) => {
 });
 
 // GET /edit
-app.get("/login", (req, res) => {
-    // console.log("GET request on route EDIT");
+app.get("/edit", (req, res) => {
+    res.render("edit", {
+        title: "Edit your profile",
+    });
+});
+
+// POST /edit
+app.post("/edit", (req, res) => {
+    const { first, last, email, age, city, homepage } = req.body;
+    db.updateProfile().then;
 });
 
 //GET /login
 app.get("/login", (req, res) => {
-    console.log(`GET request on route "/login"`);
     res.render("login", {
         title: "login",
     });
@@ -183,19 +187,19 @@ app.post("/login", (req, res) => {
         });
 });
 
-//GET /logout
-app.get("/logout", (req, res) => {
-    console.log("User redirected to logout");
-    res.render("logout", {
-        title: "logout",
-    });
-});
+// //GET /logout
+// app.get("/logout", (req, res) => {
+//     console.log("User redirected to logout");
+//     res.render("logout", {
+//         title: "logout",
+//     });
+// });
 
-//POST /logout
-app.post("/logout", (req, res) => {
-    console.log("User has logged out");
-    req.session = null;
-});
+// //POST /logout
+// app.post("/logout", (req, res) => {
+//     console.log("User has logged out");
+//     req.session = null;
+// });
 
 // GET /petition
 app.get("/petition", (req, res) => {
@@ -211,7 +215,6 @@ app.get("/petition", (req, res) => {
 
 // POST /petition
 app.post("/petition", (req, res) => {
-    console.log("POST request was made - signature submitted");
     const { signature } = req.body;
     db.addSignature(signature, req.session.userId)
         .then(({ rows }) => {
@@ -234,9 +237,7 @@ app.get("/thanks", (req, res) => {
         ])
             .then((result) => {
                 let signature = result[0].rows[0].signature;
-                console.log("signature: ", signature);
                 let count = result[1].rows[0].count;
-                console.log("total: ", count);
                 res.render("thanks", {
                     title: "Thank you for signing",
                     count,
@@ -256,8 +257,10 @@ app.get("/signers", (req, res) => {
     } else
         db.getSignatories()
             .then(({ rows }) => {
+                console.log("rows ", rows);
                 res.render("signers", {
                     title: "Petition signatories",
+                    // city: city.charAt(0).toUpperCase() + city.substring(1), // working on this
                     rows,
                 });
             })
@@ -268,16 +271,15 @@ app.get("/signers", (req, res) => {
 
 //GET signers//city
 app.get("/signers/:city", (req, res) => {
-    let city = req.params;
-    console.log("city :", city, req.params);
-
+    let city = req.params.city;
     db.getSignatoriesByCity(city)
         .then(({ rows }) => {
+            city =
+                req.params.city.charAt(0).toUpperCase() +
+                req.params.city.substring(1);
+            console.log("City: ", city);
             res.render("signers", {
-                title: "city.charAt(0).toUpperCase() + str.substring(1)",
-                city: "city.charAt(0).toUpperCase() + str.substring(1)",
-                // title: city,
-                // city: city,
+                title: city,
                 rows,
             });
         })
