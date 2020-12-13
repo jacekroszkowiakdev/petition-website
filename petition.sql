@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS users;
 
    CREATE TABLE signatures(
       id SERIAL PRIMARY KEY,
-      signature TEXT NOT NULL,
+      signature VARCHAR NOT NULL,
       user_id INTEGER NOT NULL REFERENCES users(id),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
  );
@@ -24,7 +24,8 @@ DROP TABLE IF EXISTS users;
       age INTEGER,
       city VARCHAR(255),
       url VARCHAR(255),
-      user_id INTEGER NOT NULL REFERENCES users(id)
+      user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
 

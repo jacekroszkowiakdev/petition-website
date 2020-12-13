@@ -1,8 +1,9 @@
+<div class="container">
 <h1>Please provide a little bit more information about yourself.</h1>
 <form method="POST">
 
         <label for="age">Age</label><br>
-        <input type="text" name="age" id="age" required><br>
+        <input type="text" name="age" id="age" ><br>
 
         <label for="city">City</label><br>
         <input type="text" name="city" id="city"><br>
@@ -12,5 +13,8 @@
 
         <input type="hidden" name="_csrf" value="{{csrfToken}}">
 
-        <button> Continue </button>
+        <button class="singup"> Continue </button>
 </form>
+<div>
+
+<link rel="stylesheet" href="/public/profile.css">

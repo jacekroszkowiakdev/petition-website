@@ -1,8 +1,16 @@
-<h1>Thanks to all people who already support our case:</h1>
+<div class="container">
+{{#if city}}
+    <h2>Thanks to all people of {{city}} who already support this case:</h2>
+{{else}}
+    <h2>Thanks to all people who already support our case:</h2>
+{{/if}}
 
     <ul>
         {{#rows}}
-                <li><a href={{url}}>{{first}} {{last}}</a>  {{age}}  <a href="/signers/{{city}}">{{city}}</a></li>
+                <li><a href={{url}}>{{first}} {{last}}</a>   {{age}}   <a href="/signers/{{city}}">{{city}}</a></li>
         {{/rows}}
     </ul>
+</div>
 
+
+<link rel="stylesheet" href="/public/signers.css">

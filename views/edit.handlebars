@@ -1,27 +1,41 @@
-<h1>Edit your profile</h1>
-<form method="POST">
-        <label for="first">First Name</label><br>
-        <input type="text" name="first" id="first" required><br>
+<div class="edit">
 
-        <label for="last">Last Name</label><br>
-        <input type="text" name="last" id="last" required><br>
+                <form method="POST">
+                <input type="hidden" name="_csrf" value="{{csrfToken}}">
 
-        <label for="email">Email Address</label><br>
-        <input type="text" name="email" id="email " required><br>
+        {{#rows}}
+                <h4>Edit your profile</h4>
 
-        <label for="password">Password</label><br>
-        <input type="text" name="password" id="password" required><br>
+                <label for="first">First Name</label><br>
+                <input type="text" name="first" id="first" value={{first}}><br>
 
-        <label for="age">Age</label><br>
-        <input type="text" name="age" id="age"><br>
+                <label for="last">Last Name</label><br>
+                <input type="text" name="last" id="last" value={{last}}><br>
 
-        <label for="city">City</label><br>
-        <input type="text" name="city" id="city"><br>
+                <label for="email">Email Address</label><br>
+                <input type="text" name="email" id="email" value={{email}}><br>
 
-        <label for="homepage">Homepage</label><br>
-        <input type="text" name="homepage" id="homepage"><br>
+                <label for="password">Password</label><br>
+                <input type="password" name="password" id="password"><br>
 
-        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+                <label for="age">Age</label><br>
+                <input type="text" name="age" id="age" value={{age}}><br>
 
-        <button> Continue </button>
-</form>
+                <label for="city">City</label><br>
+                <input type="text" name="city" id="city" value={{city}}><br>
+
+                <label for="homepage">Homepage</label><br>
+                <input type="text" name="homepage" id="homepage" value{{homepage}}><br>
+
+                <div class="buttons">
+                        <button class="continue"> Continue </button>
+                        <a href=""><button class="cancel">Cancel</button></a>
+                </div>
+        {{/rows}}
+
+
+        </form>
+</div>
+
+
+<link rel="stylesheet" href="../edit.css"

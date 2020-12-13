@@ -1,0 +1,13 @@
+{{#if userLoggedOut}}
+    <header>
+        <a href="/petition">Petition</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </header>
+{{else}}
+    <header>
+        <a href="/petition">Petition</a>
+        <a href="/edit">Edit your profile</a>
+        <a href="/logout">Logout</a>
+    </header>
+{{/if}}

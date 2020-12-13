@@ -1,8 +1,21 @@
-<h1>Many thanks for signing the petition, please be sure to tell your friends about it!</h1>
-<h2>There are {{count}} of us!</h2>
-<h2>Interested who has already singed? Click <a href="/signers">here</a></h2>
+
+<div class="container">
+
+<h3>Many thanks for signing the petition, please be sure to tell your friends about it!</h3>
+<h4>There are already {{count}} supporters!</h4>
+<h4>Interested who has already singed? Click <a href="/signers">here</a></h4>
 
 <img src={{signature}} alt="copy of users signature">
+
+<form method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    <button>Delete signature</button>
+    <p>this deletes your signature for petition data base and takes you back to petition main page</p>
+</form>
+</div>
+
+<link rel="stylesheet" href="../thanks.css">
+
 
 
 

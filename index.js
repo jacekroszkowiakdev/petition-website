@@ -38,6 +38,15 @@ app.use((req, res, next) => {
 app.engine("handlebars", hb());
 app.set("view engine", "handlebars");
 
+// Middleware for routes logic:
+
+const {
+    requireLoggedIn,
+    requireLoggedOut,
+    requireSignedPetition,
+    requireUnsignedPetition,
+} = require("./middleware");
+
 // Routes:
 
 // GET "/"
@@ -46,16 +55,15 @@ app.get("/", (req, res) => {
 });
 
 // GET /register
-app.get("/register", (req, res) => {
-    if (req.session.userId !== true) {
-        res.render("registration", {
-            title: "register",
-        });
-    } else res.redirect("/login");
+app.get("/register", requireLoggedOut, (req, res) => {
+    res.render("registration", {
+        title: "register",
+        userLoggedOut: true,
+    });
 });
 
 // POST /register
-app.post("/register", (req, res) => {
+app.post("/register", requireLoggedOut, (req, res) => {
     const { first, last, email, password } = req.body;
     console.log("register body: ", req.body);
     hash(password)
@@ -70,13 +78,15 @@ app.post("/register", (req, res) => {
                 .then(({ rows }) => {
                     console.log("New user added to table users");
                     req.session.userId = rows[0].id;
-                    req.session.registered = true;
+                    req.session.name = rows[0].first;
                     res.redirect("/profile");
                 })
                 .catch((err) => {
                     console.log("error creating user profile", err);
                     res.render("registration", {
                         title: "register",
+                        userLoggedOut: true,
+                        name: req.session.name,
                         message:
                             "You made an error while creating your user profile, please fill required fields again and submit to register",
                     });
@@ -86,6 +96,7 @@ app.post("/register", (req, res) => {
             console.log("error creating user profile", err);
             res.render("registration", {
                 title: "register",
+                userLoggedOut: true,
                 message:
                     "You made an error while creating your user profile, please fill required fields again and submit to register",
             });
@@ -93,25 +104,26 @@ app.post("/register", (req, res) => {
 });
 
 // GET /profile
-app.get("/profile", (req, res) => {
-    if (typeof req.session.userId === "number") {
-        res.render("profile", {
-            title: "profile",
-        });
-    } else {
-        res.redirect("/register");
-    }
+app.get("/profile", requireLoggedIn, requireUnsignedPetition, (req, res) => {
+    res.render("profile", {
+        title: "profile",
+    });
 });
 
 //POST /profile
-app.post("/profile", (req, res) => {
+app.post("/profile", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     const { age, city, homepage } = req.body;
     if (
         homepage.startsWith("http://") ||
         homepage.startsWith("https://") ||
         homepage === ""
     ) {
-        db.addProfile(age, city.toLowerCase(), homepage, req.session.userId)
+        db.addProfile(
+            age,
+            city.toLowerCase(),
+            homepage.toLowerCase(),
+            req.session.userId
+        )
             .then(() => {
                 console.log("User profile added do DB");
                 res.redirect("/petition");
@@ -132,34 +144,134 @@ app.post("/profile", (req, res) => {
 });
 
 // GET /edit
-app.get("/edit", (req, res) => {
-    res.render("edit", {
-        title: "Edit your profile",
-    });
+app.get("/edit", requireLoggedIn, (req, res) => {
+    console.log("all user data loaded from DB");
+    db.getCombinedUserData(req.session.userId)
+        .then(({ rows }) => {
+            res.render("edit", {
+                title: "Edit your profile",
+                rows,
+                name: req.session.name,
+            });
+        })
+        .catch((err) => {
+            console.log("error loading cross-table user data", err);
+        });
 });
 
 // POST /edit
-app.post("/edit", (req, res) => {
-    const { first, last, email, age, city, homepage } = req.body;
-    db.updateProfile().then;
+app.post("/edit", requireLoggedIn, (req, res) => {
+    const { first, last, email, password, age, city, homepage } = req.body;
+    if (password !== "") {
+        hash(password)
+            .then((hashedPassword) => {
+                db.updateCredentials(
+                    first,
+                    last,
+                    email,
+                    hashedPassword,
+                    req.session.userId
+                )
+                    .then(() => {
+                        console.log("Users table updated");
+                    })
+                    .then(() => {
+                        //EXPORT FUNCTION UPSERT HERE
+                        if (
+                            homepage.startsWith("http://") ||
+                            homepage.startsWith("https://") ||
+                            homepage == ""
+                        ) {
+                            db.upsertProfile(
+                                age,
+                                city.toLowerCase(),
+                                homepage.toLowerCase(),
+                                req.session.userId
+                            )
+                                .then(() => {
+                                    console.log("User profiles table updated");
+                                    res.redirect("/edit");
+                                })
+                                .catch((err) =>
+                                    console.log(
+                                        "Error while updating user profile",
+                                        err
+                                    )
+                                );
+                        } else {
+                            res.redirect("/edit");
+                        }
+                    })
+                    .catch((err) =>
+                        console.log("Error while updating user profile", err)
+                    );
+            })
+            .catch((err) => {
+                console.log("Error while updating user profile", err);
+                res.render("edit", {
+                    title: "edit",
+                    message:
+                        "Something went wrong- please fill the fields again",
+                });
+            });
+    } else {
+        db.updateWithOldPassword(req.session.userId, first, last, email)
+            .then(() => {
+                console.log("Profile updated, user keeps password");
+            })
+            .then(() => {
+                //EXPORT FUNCTION UPSERT HERE
+                if (
+                    homepage.startsWith("http://") ||
+                    homepage.startsWith("https://") ||
+                    homepage == ""
+                ) {
+                    db.upsertProfile(
+                        age,
+                        city.toLowerCase(),
+                        homepage.toLowerCase(),
+                        req.session.userId
+                    )
+                        .then(() => {
+                            console.log("User profiles table updated");
+                            res.redirect("/edit");
+                        })
+                        .catch((err) =>
+                            console.log(
+                                "Error while updating user profile",
+                                err
+                            )
+                        );
+                } else {
+                    res.redirect("/edit");
+                }
+            })
+            .catch((err) =>
+                console.log("Error while updating user profile", err)
+            );
+    }
 });
 
 //GET /login
-app.get("/login", (req, res) => {
+app.get("/login", requireLoggedOut, (req, res) => {
     res.render("login", {
         title: "login",
+        userLoggedOut: true,
     });
 });
 
 //POST /login
-app.post("/login", (req, res) => {
+app.post("/login", requireLoggedOut, (req, res) => {
     const { email, password } = req.body;
     db.checkForUserEmail(email)
         .then(({ rows }) => {
+            console.log("typedPass: ", password);
+            console.log("db stored Pass", rows[0].password);
             compare(password, rows[0].password).then(({ result }) => {
                 if (result) {
+                    console.log("Result: ", result);
+                    console.log("req.session.userId", req.session.userId);
                     req.session.userId = rows[0].id;
-                    req.session.loggedIn = true;
                     db.checkForUserSignature(rows[0].id)
                         .then(({ rows }) => {
                             if (rows.length > 0) {
@@ -175,6 +287,14 @@ app.post("/login", (req, res) => {
                                     "You have entered incorrect login or password.",
                             });
                         });
+                } else {
+                    console.log("error in compare");
+                    res.render("login", {
+                        title: "login",
+                        userLoggedOut: true,
+                        message:
+                            "No match was found for the credentials you have entered",
+                    });
                 }
             });
         })
@@ -182,39 +302,30 @@ app.post("/login", (req, res) => {
             console.log("passwords don't match", err);
             res.render("login", {
                 title: "login",
+                userLoggedOut: true,
                 message: "You have entered incorrect login or password.",
             });
         });
 });
 
-// //GET /logout
-// app.get("/logout", (req, res) => {
-//     console.log("User redirected to logout");
-//     res.render("logout", {
-//         title: "logout",
-//     });
-// });
-
-// //POST /logout
-// app.post("/logout", (req, res) => {
-//     console.log("User has logged out");
-//     req.session = null;
-// });
+//GET /logout
+app.get("/logout", requireLoggedIn, (req, res) => {
+    req.session = null;
+    res.render("logout", {
+        title: "logout",
+    });
+});
 
 // GET /petition
-app.get("/petition", (req, res) => {
-    if (typeof req.session.userId === "number") {
-        if (req.session.signatureId !== true) {
-            console.log(`user is requesting GET / route from "/petition"`);
-            res.render("petition", {
-                title: "Welcome to my petition",
-            });
-        } else res.redirect("/thanks");
-    } else res.redirect("/login");
+app.get("/petition", requireLoggedIn, requireUnsignedPetition, (req, res) => {
+    console.log(`user is requesting GET / route from "/petition"`);
+    res.render("petition", {
+        title: "Welcome to my petition",
+    });
 });
 
 // POST /petition
-app.post("/petition", (req, res) => {
+app.post("/petition", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     const { signature } = req.body;
     db.addSignature(signature, req.session.userId)
         .then(({ rows }) => {
@@ -226,67 +337,78 @@ app.post("/petition", (req, res) => {
         });
 });
 
-// 3 GET /thanks
-app.get("/thanks", (req, res) => {
-    if (typeof req.session.signatureId !== "number") {
-        res.redirect("/petition");
-    } else {
-        return Promise.all([
-            db.getSignaturePic(req.session.userId),
-            db.getSignatoriesNumber(),
-        ])
-            .then((result) => {
-                let signature = result[0].rows[0].signature;
-                let count = result[1].rows[0].count;
-                res.render("thanks", {
-                    title: "Thank you for signing",
-                    count,
-                    signature,
-                });
-            })
-            .catch((err) => {
-                console.log("error reading data from DB : ", err);
+// GET /thanks
+app.get("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
+    return Promise.all([
+        db.getSignaturePic(req.session.signatureId),
+        db.getSignatoriesNumber(),
+    ])
+        .then((result) => {
+            let signature = result[0].rows[0].signature;
+            let count = result[1].rows[0].count;
+            res.render("thanks", {
+                title: "Thank you for signing",
+                count,
+                signature,
             });
-    }
+        })
+        .catch((err) => {
+            console.log("error reading data from DB : ", err);
+        });
 });
 
-// 4 GET /signers
-app.get("/signers", (req, res) => {
-    if (typeof req.session.signatureId !== "number") {
-        res.redirect("/petition");
-    } else
-        db.getSignatories()
-            .then(({ rows }) => {
-                console.log("rows ", rows);
-                res.render("signers", {
-                    title: "Petition signatories",
-                    // city: city.charAt(0).toUpperCase() + city.substring(1), // working on this
-                    rows,
-                });
-            })
-            .catch((err) => {
-                console.log("error reading signatories form DB : ", err);
-            });
+//POST / thanks
+app.post("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
+    db.deleteSignature(req.session.userId)
+        .then(() => {
+            req.session.signatureId = null;
+            res.redirect("/petition");
+        })
+        .catch((err) => {
+            console.log("error while attempt to delete signature from DB", err);
+        });
 });
 
-//GET signers//city
-app.get("/signers/:city", (req, res) => {
-    let city = req.params.city;
-    db.getSignatoriesByCity(city)
+// GET /signers
+app.get("/signers", requireLoggedIn, requireSignedPetition, (req, res) => {
+    db.getSignatories()
         .then(({ rows }) => {
-            city =
-                req.params.city.charAt(0).toUpperCase() +
-                req.params.city.substring(1);
-            console.log("City: ", city);
+            // for (let i = 0; i < rows.length; i++) {
+            //     let city = rows[i].city;
+            //     city = city.charAt(0).toUpperCase() + city.substring(1);
+            // }
+
             res.render("signers", {
-                title: city,
+                title: "Petition signatories",
                 rows,
             });
         })
         .catch((err) => {
-            console.log("error reading signatories/cities form DB : ", err);
+            console.log("error reading signatories form DB : ", err);
         });
 });
+
+//GET signers//city
+app.get(
+    "/signers/:city",
+    requireLoggedIn,
+    requireSignedPetition,
+    (req, res) => {
+        let city = req.params.city;
+        db.getSignatoriesByCity(city)
+            .then(({ rows }) => {
+                res.render("signers", {
+                    title:
+                        req.params.city.charAt(0).toUpperCase() +
+                        req.params.city.substring(1),
+                    rows,
+                });
+            })
+            .catch((err) => {
+                console.log("error reading signatories/cities form DB : ", err);
+            });
+    }
+);
 
 app.listen(process.env.PORT || 8080, () =>
     console.log("Petition test server listening on port 8080")
