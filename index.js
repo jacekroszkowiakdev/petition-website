@@ -68,6 +68,7 @@ app.post("/register", requireLoggedOut, (req, res) => {
     console.log("register body: ", req.body);
     hash(password)
         .then((hashedPassword) => {
+            console.log("Hp: ", hashedPassword);
             db.addCredentials(
                 first,
                 last,
@@ -87,6 +88,7 @@ app.post("/register", requireLoggedOut, (req, res) => {
                         title: "register",
                         userLoggedOut: true,
                         name: req.session.name,
+                        error: true,
                         message:
                             "You made an error while creating your user profile, please fill required fields again and submit to register",
                     });
@@ -97,6 +99,7 @@ app.post("/register", requireLoggedOut, (req, res) => {
             res.render("registration", {
                 title: "register",
                 userLoggedOut: true,
+                error: true,
                 message:
                     "You made an error while creating your user profile, please fill required fields again and submit to register",
             });
@@ -132,6 +135,7 @@ app.post("/profile", requireLoggedIn, requireUnsignedPetition, (req, res) => {
                 console.log("Profile write to DB failed", err);
                 res.render("profile", {
                     title: "profile",
+                    error: true,
                     message: "Something went wrong, please try again.",
                 });
             });
@@ -210,22 +214,24 @@ app.post("/edit", requireLoggedIn, (req, res) => {
                 console.log("Error while updating user profile", err);
                 res.render("edit", {
                     title: "edit",
+                    error: true,
                     message:
                         "Something went wrong- please fill the fields again",
                 });
             });
     } else {
-        db.updateWithOldPassword(req.session.userId, first, last, email)
+        db.updateWithOldPassword(first, last, email, req.session.userId)
             .then(() => {
                 console.log("Profile updated, user keeps password");
             })
             .then(() => {
-                //EXPORT FUNCTION UPSERT HERE
+                console.log("then...");
                 if (
                     homepage.startsWith("http://") ||
                     homepage.startsWith("https://") ||
                     homepage == ""
                 ) {
+                    console.log("berofe upsert");
                     db.upsertProfile(
                         age,
                         city.toLowerCase(),
@@ -247,7 +253,7 @@ app.post("/edit", requireLoggedIn, (req, res) => {
                 }
             })
             .catch((err) =>
-                console.log("Error while updating user profile", err)
+                console.log("Error while updating users table", err)
             );
     }
 });
@@ -267,9 +273,9 @@ app.post("/login", requireLoggedOut, (req, res) => {
         .then(({ rows }) => {
             console.log("typedPass: ", password);
             console.log("db stored Pass", rows[0].password);
-            compare(password, rows[0].password).then(({ result }) => {
+            compare(password, rows[0].password).then((result) => {
+                console.log("rez:", result);
                 if (result) {
-                    console.log("Result: ", result);
                     console.log("req.session.userId", req.session.userId);
                     req.session.userId = rows[0].id;
                     db.checkForUserSignature(rows[0].id)
@@ -283,6 +289,7 @@ app.post("/login", requireLoggedOut, (req, res) => {
                             console.log("signature not in DB", err);
                             res.render("login", {
                                 title: "login",
+                                error: true,
                                 message:
                                     "You have entered incorrect login or password.",
                             });
@@ -292,6 +299,7 @@ app.post("/login", requireLoggedOut, (req, res) => {
                     res.render("login", {
                         title: "login",
                         userLoggedOut: true,
+                        error: true,
                         message:
                             "No match was found for the credentials you have entered",
                     });
@@ -303,6 +311,7 @@ app.post("/login", requireLoggedOut, (req, res) => {
             res.render("login", {
                 title: "login",
                 userLoggedOut: true,
+                error: true,
                 message: "You have entered incorrect login or password.",
             });
         });

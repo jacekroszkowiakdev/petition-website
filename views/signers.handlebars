@@ -5,6 +5,10 @@
     <h2>Thanks to all people who already support our case:</h2>
 {{/if}}
 
+{{#if error}}
+    <h2>{{message}}</h2>
+{{/if}}
+
     <ul>
         {{#rows}}
                 <li><a href={{url}}>{{first}} {{last}}</a>   {{age}}   <a href="/signers/{{city}}">{{city}}</a></li>

@@ -9,9 +9,11 @@
 
         <button class="signup"> Sign up </button>
 </form>
-<div id="message">
-    <p>{{message}}</p>
-</div>
+
+{{#if error}}
+    <h2>{{message}}</h2>
+{{/if}}
+
 <h3>Not registered user? Click to <a href="/register">create account</a></h3>
 </div>
 

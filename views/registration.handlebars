@@ -1,6 +1,10 @@
 <div class="container">
         <h3>To sign this petition you need to first to create an user account by filling and submitting a form below </h3>
 
+        {{#if error}}
+                <h2>{{message}}</h2>
+        {{/if}}
+
                 <form method="POST">
                         <label for="first">First Name</label><br>
                         <input type="text" name="first" id="first" required><br>

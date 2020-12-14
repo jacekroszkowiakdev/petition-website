@@ -1,5 +1,10 @@
 <div class="container">
 <h1>Please provide a little bit more information about yourself.</h1>
+
+{{#if error}}
+    <h2>{{message}}</h2>
+{{/if}}
+
 <form method="POST">
 
         <label for="age">Age</label><br>

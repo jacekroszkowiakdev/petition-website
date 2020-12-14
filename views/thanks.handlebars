@@ -5,6 +5,11 @@
 <h4>There are already {{count}} supporters!</h4>
 <h4>Interested who has already singed? Click <a href="/signers">here</a></h4>
 
+
+{{#if error}}
+    <h2>{{message}}</h2>
+{{/if}}
+
 <img src={{signature}} alt="copy of users signature">
 
 <form method="POST">
