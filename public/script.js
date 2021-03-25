@@ -3,32 +3,31 @@
     const ctx = canvas.getContext("2d");
     let signature = document.querySelector("#signature");
     let dataURL;
-
+    let buttonIsDown = false;
     // Attach a mousedown, mousemove, and mouseup event listener to the canvas DOM
     // on mousedown, get the mouse coordinates, and use the moveTo() method to position your drawing cursor and the beginPath() method to begin a new drawing path.
     // on mousemove, continuously add a new point to the path with lineTo(), and color the last segment with stroke().
     // on mouseup, set a flag to disable the drawing.
 
     canvas.addEventListener("mousedown", (evt) => {
-        let flag = true;
+        buttonIsDown = true;
         let canvasX = canvas.getBoundingClientRect().left;
         let canvasY = canvas.getBoundingClientRect().top;
         ctx.beginPath();
         ctx.lineWidth = 3;
         ctx.moveTo(evt.pageX - canvasX, evt.pageY - canvasY);
-
-        canvas.addEventListener("mousemove", (evt) => {
-            if (flag) {
-                ctx.lineTo(evt.pageX - canvasX, evt.pageY - canvasY);
-                ctx.stroke();
-            }
-        });
-        canvas.addEventListener("mouseup", () => {
-            flag = false;
-            dataURL = canvas.toDataURL();
-            signature.value = dataURL;
-            console.log("signature.value: ", signature.value);
-        });
+    });
+    canvas.addEventListener("mousemove", (evt) => {
+        if (buttonIsDown) {
+            ctx.lineTo(evt.pageX - canvasX, evt.pageY - canvasY);
+            ctx.stroke();
+        }
+    });
+    canvas.addEventListener("mouseup", () => {
+        buttonIsDown = false;
+        dataURL = canvas.toDataURL();
+        signature.value = dataURL;
+        console.log("signature.value: ", signature.value);
     });
 })();
 
