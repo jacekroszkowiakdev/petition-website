@@ -13,6 +13,7 @@
         canvasY = rect.top;
     }
 
+    // Browser mouse events:
     canvas.addEventListener("mousedown", (evt) => {
         buttonIsDown = true;
         getCanvasPosition(evt);
@@ -37,6 +38,7 @@
 
     // Touch events:
     canvas.addEventListener("touchstart", (evt) => {
+        c;
         buttonIsDown = true;
         getCanvasPosition(evt.touches[0]);
         ctx.beginPath();
