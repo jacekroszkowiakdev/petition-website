@@ -1,5 +1,7 @@
 const express = require("express");
 const app = express();
+const path = require("path");
+
 const hb = require("express-handlebars");
 const db = require("./db");
 const cookieSession = require("cookie-session");
@@ -8,7 +10,6 @@ const csurf = require("csurf");
 const frameguard = require("frameguard");
 
 // Middleware:
-
 app.use(
     cookieSession({
         secret: `Grzegorz Brzęczyszczykiewicz`,
@@ -35,8 +36,20 @@ app.use((req, res, next) => {
 });
 
 // template rendering engine
-app.engine("handlebars", hb());
+const viewsDir = path.join(__dirname, "../frontend/views");
+
+app.engine(
+    "handlebars",
+    hb({
+        defaultLayout: "main",
+        layoutsDir: path.join(viewsDir, "layouts"),
+        partialsDir: path.join(viewsDir, "partials"),
+        extname: "handlebars",
+    })
+);
+
 app.set("view engine", "handlebars");
+app.set("views", viewsDir);
 
 // Middleware for routes logic:
 
@@ -45,7 +58,7 @@ const {
     requireLoggedOut,
     requireSignedPetition,
     requireUnsignedPetition,
-} = require("./middleware");
+} = require("./middleware/middleware");
 
 // Routes:
 
@@ -68,7 +81,7 @@ app.post("/register", requireLoggedOut, (req, res) => {
     console.log("register body: ", req.body);
     hash(password)
         .then((hashedPassword) => {
-            console.log("Hp: ", hashedPassword);
+            // console.log("Hp: ", hashedPassword);
             db.addCredentials(
                 first,
                 last,
@@ -231,7 +244,7 @@ app.post("/edit", requireLoggedIn, (req, res) => {
                     homepage.startsWith("https://") ||
                     homepage == ""
                 ) {
-                    console.log("berofe upsert");
+                    console.log("before upsert");
                     db.upsertProfile(
                         age,
                         city.toLowerCase(),
