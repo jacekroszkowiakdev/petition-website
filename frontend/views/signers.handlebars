@@ -1,20 +1,21 @@
-<div class="container">
-{{#if city}}
-    <h2>Thanks to all people of {{city}} who already support this case:</h2>
-{{else}}
-    <h2>Thanks to all people who already support our case:</h2>
-{{/if}}
+<div class="modal">
+    {{#if city}}
+        <h2>Thanks to all people of {{city}} who already support this case:</h2>
+    {{else}}
+        <h2>Thanks to all people who already support our case:</h2>
+    {{/if}}
 
-{{#if error}}
-    <h2>{{message}}</h2>
-{{/if}}
+    {{#if error}}
+        <h2>{{message}}</h2>
+    {{/if}}
 
     <ul>
         {{#rows}}
-                <li><a href={{url}}>{{first}} {{last}}</a>   {{age}}   <a href="/signers/{{city}}">{{city}}</a></li>
+            <li><a href={{url}}>{{first}} {{last}}</a>
+                {{age}}
+                <a href="/signers/{{city}}">{{city}}</a></li>
         {{/rows}}
     </ul>
 </div>
 
-
-<link rel="stylesheet" href="/public/signers.css">
+<link rel="stylesheet" href="../public/signers.css" />

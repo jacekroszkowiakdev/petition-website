@@ -1,20 +1,27 @@
-<div class="container">
-<form method="POST">
-        <label for="email">Email Address</label><br>
-        <input type="text" name="email" id="email"><br>
+<div class="modal">
+    <div class="login-container">
 
-        <label for="password">Password</label><br>
-        <input type="password" name="password" id="password"><br>
-        <input type="hidden" name="_csrf" value="{{csrfToken}}">
+        <div class="login-form">
+            <form method="POST">
+                <label for="email">Email Address</label><br />
+                <input type="text" name="email" id="email" /><br />
 
-        <button class="signup"> Sign up </button>
-</form>
+                <label for="password">Password</label><br />
+                <input type="password" name="password" id="password" /><br />
+                <input type="hidden" name="_csrf" value="{{csrfToken}}" />
 
-{{#if error}}
-    <h2>{{message}}</h2>
-{{/if}}
+                <button class="signIn-button">Sign in</button>
+            </form>
+        </div>
 
-<h3>Not registered user? Click to <a href="/register">create account</a></h3>
+        {{#if error}}
+            <h2>{{message}}</h2>
+        {{/if}}
+
+        <p>Not registered yet? Click to
+            <a href="/register">create account</a>
+        </p>
+    </div>
 </div>
 
-<link rel="stylesheet" href="/public/login.css">
+<link rel="stylesheet" href="../public/login.css" />

@@ -1,0 +1,119 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    font-family: "Montserrat", sans-serif;
+}
+
+header {
+    width: 100%;
+    height: 10vh;
+    display: grid;
+    grid-template-columns: 200px 200px 200px;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: rgba(253, 253, 253, 0.55);
+}
+
+header a {
+    text-decoration: none;
+    color: black;
+    font-size: 1.3rem;
+    margin-right: 35px;
+    justify-self: start;
+}
+
+header a:hover {
+    transform: scale(0.9) translateY(1%);
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-size: cover;
+    background-image: url("../assets/e-scooter.jpg");
+    background-position: center;
+}
+
+main {
+    display: flex;
+    flex-flow: column wrap;
+    width: 100%;
+    height: 90vh;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+}
+
+.modal {
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    text-align: center;
+    border-radius: 3px;
+    background-color: rgba(253, 253, 253, 0.8);
+    width: 60vw;
+    min-height: 60vh;
+    padding: 5px 5px 20px 5px;
+    box-shadow: 0px 6px 8px -1px rgba(77, 77, 77, 0.76);
+}
+
+.modal .petition-intro {
+    height: 150px;
+    max-width: 60vw;
+    padding: 10px 30px;
+    line-height: 1.8;
+    display: flex;
+    align-items: center;
+    text-align: center;
+}
+
+.modal .registration-form,
+.login-form {
+    width: 40%;
+    padding: 20px;
+    margin: 15px;
+    line-height: 1.8;
+    background-color: rgba(231, 231, 231, 0.5);
+    border-radius: 4px;
+}
+
+.modal input {
+    height: 35px;
+    width: 200px;
+    text-indent: 5px;
+    border-radius: 3px;
+}
+
+.modal label {
+    font-size: 0.8rem;
+    color: black;
+}
+
+.modal .signUp-button,
+.signIn-button {
+    width: fit-content;
+    padding: 5px 10px;
+    margin-top: 25px;
+    margin-bottom: 5px;
+}
+
+.modal .signUp-button:hover,
+.signIn-button:hover {
+    transform: scale(1.1) translateY(1%);
+}
+
+footer {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    bottom: 0;
+    width: 100%;
+    height: 3vh;
+    padding: 10px;
+    background-color: rgba(253, 253, 253, 0.5);
+}

@@ -17,7 +17,7 @@ app.use(
     })
 );
 
-app.use(express.static("./public"));
+app.use(express.static(path.join(__dirname, "../frontend/public")));
 app.use(express.urlencoded({ extended: false }));
 
 app.use(csurf());
@@ -70,7 +70,7 @@ app.get("/", (req, res) => {
 // GET /register
 app.get("/register", requireLoggedOut, (req, res) => {
     res.render("registration", {
-        title: "register",
+        title: "Sign Up",
         userLoggedOut: true,
     });
 });

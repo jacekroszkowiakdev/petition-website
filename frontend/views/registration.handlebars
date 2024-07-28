@@ -1,30 +1,38 @@
-<div class="container">
-        <h2>Lying around, on the streets, bike lanes and sidewalks! Let's change the way people use electric scooters!</h2><br>
-        <h3>To sign this petition you need to first to create an user account by filling and submitting a form below </h3>
+<div class="modal">
+    <div class="petition-intro">
+        <p>
+            Help us transform our streets, bike lanes, and sidewalks by
+            promoting responsible use of electric scooters! Together, we can
+            create safer and more enjoyable public spaces for everyone.
+            <br />
+            <br />
+            <span>
+                Join our movement! Sign the petition by creating a user account
+                below and make your voice heard.
+            </span>
+        </p>
+    </div>
 
-        {{#if error}}
-                <h2>{{message}}</h2>
-        {{/if}}
+    {{#if error}}
+        <h2>{{message}}</h2>
+    {{/if}}
 
+    <form class="registration-form" method="POST">
+        <label for="first">First Name</label><br />
+        <input type="text" name="first" id="first" required /><br />
 
+        <label for="last">Last Name</label><br />
+        <input type="text" name="last" id="last" required /><br />
 
-                <form method="POST">
-                        <label for="first">First Name</label><br>
-                        <input type="text" name="first" id="first" required><br>
+        <label for="email">Email Address</label><br />
+        <input type="text" name="email" id="email " required /><br />
 
-                        <label for="last">Last Name</label><br>
-                        <input type="text" name="last" id="last" required><br>
+        <label for="password">Password</label><br />
+        <input type="password" name="password" id="password" required /><br />
+        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
 
-                        <label for="email">Email Address</label><br>
-                        <input type="text" name="email" id="email " required><br>
-
-                        <label for="password">Password</label><br>
-                        <input type="password" name="password" id="password" required><br>
-                        <input type="hidden" name="_csrf" value="{{csrfToken}}">
-
-                        <button class="signup"> Sign up </button>
-                </form>
+        <button class="signUp-button"> Sign up </button>
+    </form>
 </div>
 
-
-<link rel="stylesheet" href="/public/register.css"
+<link rel="stylesheet" href="../public/registration.css" />
