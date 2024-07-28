@@ -1,38 +1,41 @@
 <div class="modal">
-    <div class="petition-intro">
-        <p>
-            Help us transform our streets, bike lanes, and sidewalks by
-            promoting responsible use of electric scooters! Together, we can
-            create safer and more enjoyable public spaces for everyone.
-            <br />
-            <br />
-            <span>
-                Join our movement! Sign the petition by creating a user account
-                below and make your voice heard.
-            </span>
-        </p>
+    <div class="signUp-container">
+        <div class="petition-intro">
+            <p>
+                Help us transform our streets, bike lanes, and sidewalks by
+                promoting responsible use of electric scooters! Together, we can
+                create safer and more enjoyable public spaces for everyone.
+                <br />
+                <br />
+                <span>
+                    Join our movement! Sign the petition by creating a user
+                    account below and make your voice heard.
+                </span>
+            </p>
+        </div>
+
+        {{#if error}}
+            <h2>{{message}}</h2>
+        {{/if}}
+
+        <form class="registration-form" method="POST">
+            <label for="first">First Name</label><br />
+            <input type="text" name="first" id="first" required /><br />
+
+            <label for="last">Last Name</label><br />
+            <input type="text" name="last" id="last" required /><br />
+
+            <label for="email">Email Address</label><br />
+            <input type="text" name="email" id="email " required /><br />
+
+            <label for="password">Password</label><br />
+            <input type="password" name="password" id="password" required /><br
+            />
+            <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+
+            <button class="signUp-button"> Sign up </button>
+        </form>
     </div>
-
-    {{#if error}}
-        <h2>{{message}}</h2>
-    {{/if}}
-
-    <form class="registration-form" method="POST">
-        <label for="first">First Name</label><br />
-        <input type="text" name="first" id="first" required /><br />
-
-        <label for="last">Last Name</label><br />
-        <input type="text" name="last" id="last" required /><br />
-
-        <label for="email">Email Address</label><br />
-        <input type="text" name="email" id="email " required /><br />
-
-        <label for="password">Password</label><br />
-        <input type="password" name="password" id="password" required /><br />
-        <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-
-        <button class="signUp-button"> Sign up </button>
-    </form>
 </div>
 
 <link rel="stylesheet" href="../public/registration.css" />
