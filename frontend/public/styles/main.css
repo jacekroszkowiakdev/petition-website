@@ -54,43 +54,39 @@ main {
     align-items: center;
     text-align: center;
     border-radius: 3px;
-    background-color: rgba(253, 253, 253, 0.8);
+    background-image: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.4),
+        rgba(75, 74, 74, 0.4),
+        rgba(75, 74, 74, 0.6) 50%,
+        rgba(75, 74, 74, 0.4),
+        rgba(255, 255, 255, 0.4)
+    );
     width: 60vw;
     min-height: 60vh;
     padding: 5px 5px 20px 5px;
     box-shadow: 0px 6px 8px -1px rgba(77, 77, 77, 0.76);
 }
 
-.modal .petition-intro {
-    height: 150px;
-    max-width: 60vw;
-    padding: 10px 30px;
-    line-height: 1.8;
-    display: flex;
-    align-items: center;
-    text-align: center;
-}
-
-.modal .registration-form,
-.login-form {
-    display: flex;
-    flex-flow: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-    line-height: 1.8;
-    background-color: rgba(231, 231, 231, 0.5);
-    border-radius: 4px;
-}
-
 .login-container,
-.signUp-container {
+.signUp-container,
+.profile-container,
+.logout-container {
     display: flex;
     flex-flow: column;
     justify-content: center;
     align-items: center;
     margin: auto;
+}
+
+.modal h2,
+p {
+    color: whitesmoke;
+    line-height: 1.8;
+}
+
+.modal a {
+    font-weight: 500;
 }
 
 .modal input {
@@ -105,8 +101,9 @@ main {
     color: black;
 }
 
-.modal .signUp-button,
-.signIn-button {
+.signUp-button,
+.signIn-button,
+.continue-button {
     width: fit-content;
     padding: 5px 10px;
     margin-top: 25px;
@@ -116,6 +113,40 @@ main {
 .modal .signUp-button:hover,
 .signIn-button:hover {
     transform: scale(1.1) translateY(1%);
+}
+
+.petition-intro,
+.profile-intro {
+    color: white;
+    height: fit-content;
+    padding: 10px 30px;
+    line-height: 1.5;
+    display: inline-block;
+    align-items: center;
+}
+
+.petition-intro p,
+.profile-intro p {
+    line-height: 1.5;
+}
+
+.modal p,
+span {
+    font-size: 1.1rem;
+}
+
+.registration-form,
+.login-form,
+.profile-form {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+    line-height: 1.8;
+    background-color: rgba(231, 231, 231, 0.6);
+    border-radius: 4px;
 }
 
 footer {

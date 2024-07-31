@@ -1,45 +1,49 @@
-<div class="edit">
-
-                <form method="POST">
-                <input type="hidden" name="_csrf" value="{{csrfToken}}">
-
-        {{#rows}}
+<div class="modal">
+    <div class="profile-container">
+        <form method="POST">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+            {{#rows}}
                 <h4>Edit your profile</h4>
 
-                <label for="first">First Name</label><br>
-                <input type="text" name="first" id="first" value={{first}}><br>
+                <label for="first">First Name</label><br />
+                <input type="text" name="first" id="first" value={{first}} /><br
+                />
 
-                <label for="last">Last Name</label><br>
-                <input type="text" name="last" id="last" value={{last}}><br>
+                <label for="last">Last Name</label><br />
+                <input type="text" name="last" id="last" value={{last}} /><br />
 
-                <label for="email">Email Address</label><br>
-                <input type="text" name="email" id="email" value={{email}}><br>
+                <label for="email">Email Address</label><br />
+                <input type="text" name="email" id="email" value={{email}} /><br
+                />
 
-                <label for="password">Password</label><br>
-                <input type="password" name="password" id="password"><br>
+                <label for="password">Password</label><br />
+                <input type="password" name="password" id="password" /><br />
 
-                <label for="age">Age</label><br>
-                <input type="text" name="age" id="age" value={{age}}><br>
+                <label for="age">Age</label><br />
+                <input type="text" name="age" id="age" value={{age}} /><br />
 
-                <label for="city">City</label><br>
-                <input type="text" name="city" id="city" value={{city}}><br>
+                <label for="city">City</label><br />
+                <input type="text" name="city" id="city" value={{city}} /><br />
 
-                <label for="homepage">Homepage</label><br>
-                <input type="text" name="homepage" id="homepage" value{{homepage}}><br>
+                <label for="homepage">Homepage</label><br />
+                <input
+                    type="text"
+                    name="homepage"
+                    id="homepage"
+                    value
+                    {{homepage}}
+                /><br />
 
                 <div class="buttons">
-                        <button class="continue"> Continue </button>
-                        <a href=""><button class="cancel">Cancel</button></a>
+                    <button class="continue"> Continue </button>
+                    <a href=""><button class="cancel">Cancel</button></a>
                 </div>
-        {{/rows}}
-
+            {{/rows}}
 
         </form>
 
         {{#if error}}
-         <h2>{{message}}</h2>
+            <h2>{{message}}</h2>
         {{/if}}
+    </div>
 </div>
-
-
-<link rel="stylesheet" href="../edit.css"
