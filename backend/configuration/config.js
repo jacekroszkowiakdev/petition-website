@@ -12,7 +12,7 @@ db.connect((err, client, release) => {
     if (err) {
         return console.error("Error acquiring client", err.stack);
     }
-    console.log("Connected to the database");
+    console.log("Connected to the petitiondb");
 });
 
 module.exports = db;
