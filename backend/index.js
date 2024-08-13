@@ -173,6 +173,7 @@ app.get("/edit", requireLoggedIn, (req, res) => {
         })
         .catch((err) => {
             console.log("error loading cross-table user data", err);
+            res.status(500).send("Internal Server Error");
         });
 });
 
