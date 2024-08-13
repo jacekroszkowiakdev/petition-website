@@ -1,8 +1,10 @@
-const spicedPg = require("spiced-pg");
-const db = spicedPg(
-    process.env.DATABASE_URL ||
-        `postgres:postgres:postgres@localhost:5432/petitiondb`
-);
+// const spicedPg = require("spiced-pg");
+// const db = spicedPg(
+//     process.env.DATABASE_URL ||
+//         `postgres:postgres:postgres@localhost:5432/petitiondb`
+// );
+
+const db = require("./configuration/config");
 
 // signatures table:
 module.exports.addSignature = (signature, userId) => {
@@ -88,9 +90,8 @@ module.exports.addProfile = (age, city, homepage, userId) => {
     console.log("Profile added");
     return db.query(q, params);
 };
-console.log("is this connected");
+
 module.exports.upsertProfile = (age, city, homepage, userId) => {
-    console.log(age, city, homepage, userId);
     const q = `INSERT INTO user_profiles (age, city, url, user_id)
     VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET age = $1, city = $2, url = $3`;
     const params = [age || null, city || null, homepage || null, userId];

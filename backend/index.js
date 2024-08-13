@@ -433,5 +433,5 @@ app.get(
 );
 
 app.listen(process.env.PORT || 8080, () =>
-    console.log("Petition test server listening on port 8080")
+    console.log("Petition server listening on port 8080")
 );
