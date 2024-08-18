@@ -81,7 +81,6 @@ app.post("/register", requireLoggedOut, (req, res) => {
     console.log("register body: ", req.body);
     hash(password)
         .then((hashedPassword) => {
-            // console.log("Hp: ", hashedPassword);
             db.addCredentials(
                 first,
                 last,
@@ -119,16 +118,16 @@ app.post("/register", requireLoggedOut, (req, res) => {
         });
 });
 
-// GET /profile
+//PROFILE
 app.get("/profile", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     res.render("profile", {
         title: "profile",
     });
 });
 
-//POST /profile
 app.post("/profile", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     const { age, city, homepage } = req.body;
+    console.log("profile body: ", req.body);
     if (
         homepage.startsWith("http://") ||
         homepage.startsWith("https://") ||
@@ -160,7 +159,7 @@ app.post("/profile", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     }
 });
 
-// GET /edit
+//EDIT
 app.get("/edit", requireLoggedIn, (req, res) => {
     console.log("all user data loaded from DB");
     db.getCombinedUserData(req.session.userId)
@@ -177,7 +176,6 @@ app.get("/edit", requireLoggedIn, (req, res) => {
         });
 });
 
-// POST /edit
 app.post("/edit", requireLoggedIn, (req, res) => {
     const { first, last, email, password, age, city, homepage } = req.body;
     if (password !== "") {
@@ -194,7 +192,6 @@ app.post("/edit", requireLoggedIn, (req, res) => {
                         console.log("Users table updated");
                     })
                     .then(() => {
-                        //EXPORT FUNCTION UPSERT HERE
                         if (
                             homepage.startsWith("http://") ||
                             homepage.startsWith("https://") ||
@@ -272,7 +269,7 @@ app.post("/edit", requireLoggedIn, (req, res) => {
     }
 });
 
-//GET /login
+//LOGIN
 app.get("/login", requireLoggedOut, (req, res) => {
     res.render("login", {
         title: "login",
@@ -280,7 +277,6 @@ app.get("/login", requireLoggedOut, (req, res) => {
     });
 });
 
-//POST /login
 app.post("/login", requireLoggedOut, (req, res) => {
     const { email, password } = req.body;
     db.checkForUserEmail(email)
@@ -331,7 +327,7 @@ app.post("/login", requireLoggedOut, (req, res) => {
         });
 });
 
-//GET /logout
+//LOGOUT
 app.get("/logout", requireLoggedIn, (req, res) => {
     req.session = null;
     res.render("logout", {
@@ -339,7 +335,7 @@ app.get("/logout", requireLoggedIn, (req, res) => {
     });
 });
 
-// GET /petition
+//PETITION
 app.get("/petition", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     console.log(`user is requesting GET / route from "/petition"`);
     res.render("petition", {
@@ -347,9 +343,9 @@ app.get("/petition", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     });
 });
 
-// POST /petition
 app.post("/petition", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     const { signature } = req.body;
+    console.log("signature string:", signature);
     db.addSignature(signature, req.session.userId)
         .then(({ rows }) => {
             req.session.signatureId = rows[0].id;
@@ -360,7 +356,7 @@ app.post("/petition", requireLoggedIn, requireUnsignedPetition, (req, res) => {
         });
 });
 
-// GET /thanks
+//THANKS
 app.get("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
     return Promise.all([
         db.getSignaturePic(req.session.signatureId),
@@ -380,7 +376,6 @@ app.get("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
         });
 });
 
-//POST / thanks
 app.post("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
     db.deleteSignature(req.session.userId)
         .then(() => {
@@ -392,7 +387,7 @@ app.post("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
         });
 });
 
-// GET /signers
+//SIGNERS
 app.get("/signers", requireLoggedIn, requireSignedPetition, (req, res) => {
     db.getSignatories()
         .then(({ rows }) => {
@@ -411,7 +406,6 @@ app.get("/signers", requireLoggedIn, requireSignedPetition, (req, res) => {
         });
 });
 
-//GET signers//city
 app.get(
     "/signers/:city",
     requireLoggedIn,
