@@ -60,14 +60,12 @@ const {
     requireUnsignedPetition,
 } = require("./middleware/middleware");
 
-// Routes:
-
-// GET "/"
+//ROOT "/"
 app.get("/", (req, res) => {
     res.redirect("/register");
 });
 
-// GET /register
+//REGISTER
 app.get("/register", requireLoggedOut, (req, res) => {
     res.render("registration", {
         title: "Sign Up",
@@ -75,7 +73,6 @@ app.get("/register", requireLoggedOut, (req, res) => {
     });
 });
 
-// POST /register
 app.post("/register", requireLoggedOut, (req, res) => {
     const { first, last, email, password } = req.body;
     console.log("register body: ", req.body);
