@@ -1,0 +1,13 @@
+# Node.js dependencies
+node_modules/
+
+
+# Logs
+logs/
+*.log
+
+# Other dependencies
+.DS_Store
+secrets.json
+
+.env
