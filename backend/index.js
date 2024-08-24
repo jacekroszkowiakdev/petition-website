@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
 
 const hb = require("express-handlebars");
 const db = require("./db");
@@ -424,6 +425,6 @@ app.get(
     }
 );
 
-app.listen(process.env.PORT || 8080, () =>
-    console.log("Petition server listening on port 8080")
+app.listen(process.env.APP_PORT || 8080, () =>
+    console.log(`Petition server listening on port ${process.env.APP_PORT}`)
 );
