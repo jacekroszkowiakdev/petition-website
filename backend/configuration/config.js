@@ -1,21 +1,17 @@
-require("dotenv").config();
-dotenv.config();
-
-console.log("PORT:", process.env.PORT);
+const path = require("path");
+require("dotenv").config({
+    path: path.resolve(__dirname, "../.env"),
+    override: true,
+});
 
 const { Pool } = require("pg");
 
 const db = new Pool({
-    // user: "petition_user",
-    // host: "localhost",
-    // database: "petitiondb",
-    // password: "SuperSecret",
-    // port: 5432,
-    user: USER,
-    host: HOST,
-    database: DATABASE,
-    password: PASSWORD,
-    port: PORT,
+    user: process.env.USER,
+    host: process.env.HOST,
+    database: process.env.DATABASE,
+    password: process.env.PASSWORD,
+    port: process.env.DB_PORT || 5432,
 });
 
 db.connect((err, client, release) => {
@@ -23,6 +19,7 @@ db.connect((err, client, release) => {
         return console.error("Error acquiring client", err.stack);
     }
     console.log("Connected to the petitiondb");
+    release();
 });
 
 module.exports = db;
