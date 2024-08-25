@@ -1,4 +1,4 @@
-const db = require("./configuration/config");
+const db = require("./configuration/dataBase.config");
 
 // signatures table:
 module.exports.addSignature = (signature, userId) => {

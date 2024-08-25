@@ -1,65 +1,40 @@
 const express = require("express");
-const app = express();
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "./.env") });
-
-const hb = require("express-handlebars");
-const db = require("./db");
-const cookieSession = require("cookie-session");
-const { hash, compare } = require("./bc");
-const csurf = require("csurf");
-const frameguard = require("frameguard");
+const sessionMiddleware = require("./middleware/session.middleware");
+const {
+    csrfMiddleware,
+    securityMiddleware,
+} = require("./middleware/security.middleware");
+const loggingMiddleware = require("./middleware/requestsLogging.middleware");
+const {
+    setupTemplateEngine,
+} = require("./configuration/templateEngine.config");
+const app = express();
+const db = require("./configuration/dataBase.config");
+const {
+    hashPassword,
+    comparePasswords,
+} = require("./utils/passwordUtils/bcrypt");
 
 // Middleware:
-app.use(
-    cookieSession({
-        secret: `Grzegorz Brzęczyszczykiewicz`,
-        maxAge: 1000 * 60 * 60 * 24 * 14,
-    })
-);
-
+app.use(sessionMiddleware);
 app.use(express.static(path.join(__dirname, "../frontend/public")));
 app.use(express.urlencoded({ extended: false }));
-
-app.use(csurf());
-app.use(function (req, res, next) {
-    res.set("x-frame-options", "DENY");
-    res.locals.csrfToken = req.csrfToken();
-    frameguard({ action: "SAMEORIGIN" });
-    next();
-});
-
-app.use((req, res, next) => {
-    console.log("-----------------");
-    console.log(`${req.method} request coming in on route ${req.url}`);
-    console.log("-----------------");
-    next();
-});
+app.use(csrfMiddleware);
+app.use(securityMiddleware);
+app.use(loggingMiddleware);
 
 // template rendering engine
-const viewsDir = path.join(__dirname, "../frontend/views");
-
-app.engine(
-    "handlebars",
-    hb({
-        defaultLayout: "main",
-        layoutsDir: path.join(viewsDir, "layouts"),
-        partialsDir: path.join(viewsDir, "partials"),
-        extname: "handlebars",
-    })
-);
-
-app.set("view engine", "handlebars");
-app.set("views", viewsDir);
+setupTemplateEngine(app);
 
 // Middleware for routes logic:
-
 const {
     requireLoggedIn,
     requireLoggedOut,
     requireSignedPetition,
     requireUnsignedPetition,
-} = require("./middleware/middleware");
+} = require("./middleware/routesLogic.middleware");
 
 //ROOT "/"
 app.get("/", (req, res) => {
@@ -77,7 +52,7 @@ app.get("/register", requireLoggedOut, (req, res) => {
 app.post("/register", requireLoggedOut, (req, res) => {
     const { first, last, email, password } = req.body;
     console.log("register body: ", req.body);
-    hash(password)
+    hashPassword(password)
         .then((hashedPassword) => {
             db.addCredentials(
                 first,
@@ -177,7 +152,7 @@ app.get("/edit", requireLoggedIn, (req, res) => {
 app.post("/edit", requireLoggedIn, (req, res) => {
     const { first, last, email, password, age, city, homepage } = req.body;
     if (password !== "") {
-        hash(password)
+        hashPassword(password)
             .then((hashedPassword) => {
                 db.updateCredentials(
                     first,
@@ -281,7 +256,7 @@ app.post("/login", requireLoggedOut, (req, res) => {
         .then(({ rows }) => {
             console.log("typedPass: ", password);
             console.log("db stored Pass", rows[0].password);
-            compare(password, rows[0].password).then((result) => {
+            comparePasswords(password, rows[0].password).then((result) => {
                 console.log("rez:", result);
                 if (result) {
                     console.log("req.session.userId", req.session.userId);
