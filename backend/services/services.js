@@ -24,17 +24,6 @@ async function checkUserSignature(userId) {
     return rows;
 }
 
-async function logoutUser(session) {
-    return new Promise((resolve, reject) => {
-        session.destroy((err) => {
-            if (err) {
-                return reject(err);
-            }
-            resolve();
-        });
-    });
-}
-
 async function saveSignature(signature, userId) {
     const { rows } = await db.addSignature(signature, userId);
     if (!rows || rows.length === 0) {
@@ -48,5 +37,4 @@ module.exports = {
     checkUserPassword,
     checkUserSignature,
     saveSignature,
-    logoutUser,
 };

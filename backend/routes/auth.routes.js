@@ -4,7 +4,6 @@ const {
     requireLoggedOut,
     requireLoggedIn,
 } = require("../middleware/routesLogic.middleware");
-const { comparePasswords } = require("../utils/passwordUtils/bcrypt");
 const {
     getUserByEmail,
     checkUserPassword,
@@ -59,11 +58,20 @@ router.post("/login", requireLoggedOut, async (req, res) => {
 });
 
 // Logout
-router.get("/logout", requireLoggedIn, (req, res) => {
-    req.session = null;
-    res.render("logout", {
-        title: "logout",
-    });
+router.get("/logout", requireLoggedIn, async (req, res) => {
+    try {
+        req.session = null;
+        res.render("logout", {
+            title: "logout",
+            message: "You have been logged out",
+        });
+    } catch (err) {
+        console.error("Error during logout:", err);
+        res.render("logout", {
+            title: "Logout",
+            message: err.message || "An error occurred during logout",
+        });
+    }
 });
 
 module.exports = router;
