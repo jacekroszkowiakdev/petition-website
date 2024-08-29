@@ -12,7 +12,6 @@ async function getUserByEmail(email) {
 
 async function checkUserPassword(user, password) {
     const isMatch = await comparePasswords(password, user.password);
-    console.log("Is match: ", isMatch);
     if (!isMatch) {
         throw new Error("Incorrect password");
     }
@@ -21,7 +20,7 @@ async function checkUserPassword(user, password) {
 
 async function checkUserSignature(userId) {
     const { rows } = await db.checkForUserSignature(userId);
-    console.log(rows);
+
     return rows;
 }
 
@@ -36,9 +35,18 @@ async function logoutUser(session) {
     });
 }
 
+async function saveSignature(signature, userId) {
+    const { rows } = await db.addSignature(signature, userId);
+    if (!rows || rows.length === 0) {
+        throw new Error("Failed to add signature.");
+    }
+    return rows[0].id;
+}
+
 module.exports = {
     getUserByEmail,
     checkUserPassword,
     checkUserSignature,
+    saveSignature,
     logoutUser,
 };
