@@ -12,14 +12,17 @@ async function getUserByEmail(email) {
 
 async function checkUserPassword(user, password) {
     const isMatch = await comparePasswords(password, user.password);
+    console.log("Is match: ", isMatch);
     if (!isMatch) {
         throw new Error("Incorrect password");
     }
+    return isMatch;
 }
 
 async function checkUserSignature(userId) {
     const { rows } = await db.checkForUserSignature(userId);
-    return rows.length > 0;
+    console.log(rows);
+    return rows;
 }
 
 async function logoutUser(session) {

@@ -73,7 +73,8 @@ router.post(
                 age,
                 city.toLowerCase(),
                 homepage.toLowerCase(),
-                req.session.userId
+                req.session.userId,
+                console.log("req.session.userId: ", req.session.userId)
             )
                 .then(() => {
                     res.redirect("/petition");

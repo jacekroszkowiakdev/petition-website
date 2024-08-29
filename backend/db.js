@@ -1,13 +1,31 @@
 const db = require("./configuration/dataBase.config");
 
 // signatures table:
+// module.exports.addSignature = (signature, userId) => {
+//     const q = `INSERT INTO signatures (signature, user_id)
+//     VALUES ($1, $2) RETURNING id`;
+//     const params = [signature, userId];
+//     console.log("input from canvas is: ", params);
+//     console.log("Signature added");
+//     return db.query(q, params);
+// };
+
 module.exports.addSignature = (signature, userId) => {
     const q = `INSERT INTO signatures (signature, user_id)
     VALUES ($1, $2) RETURNING id`;
     const params = [signature, userId];
     console.log("input from canvas is: ", params);
-    console.log("Signature added");
-    return db.query(q, params);
+
+    return db
+        .query(q, params)
+        .then((result) => {
+            console.log("Signature saved:", result.rows[0]);
+            return result;
+        })
+        .catch((err) => {
+            console.error("Error saving signature:", err);
+            throw err;
+        });
 };
 
 module.exports.getSignatoriesNumber = () => {
@@ -70,10 +88,14 @@ module.exports.checkForUserEmail = (email) => {
     return db.query("SELECT password, id FROM users WHERE email = $1", [email]);
 };
 
-module.exports.checkForUserSignature = (userId) => {
-    return db.query("SELECT signature FROM signatures WHERE user_id = ($1)", [
-        userId,
-    ]);
+module.exports.checkForUserSignature = async (userId) => {
+    return db.query("SELECT id FROM signatures WHERE user_id = $1", [userId]);
+    //    await db.query(
+    //         "SELECT id FROM signatures WHERE user_id = $1",
+    //         [userId]
+    //     );
+    //     console.log("checkForUserSignature result:", result);
+    //     return result;
 };
 
 //user_profiles table:
