@@ -45,22 +45,4 @@ router.post(
     }
 );
 
-// router.post(
-//     "/petition",
-//     requireLoggedIn,
-//     requireUnsignedPetition,
-//     (req, res) => {
-//         const { signature } = req.body;
-
-//         db.addSignature(signature, req.session.userId)
-//             .then(({ rows }) => {
-//                 req.session.signatureId = rows[0].id;
-//                 res.redirect("/thanks");
-//             })
-//             .catch((err) => {
-//                 console.log("POST/petition error writing to DataBase: ", err);
-//             });
-//     }
-// );
-
 module.exports = router;

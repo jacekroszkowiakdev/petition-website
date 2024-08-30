@@ -20,7 +20,6 @@ async function checkUserPassword(user, password) {
 
 async function checkUserSignature(userId) {
     const { rows } = await db.checkForUserSignature(userId);
-
     return rows;
 }
 
@@ -32,9 +31,29 @@ async function saveSignature(signature, userId) {
     return rows[0].id;
 }
 
+async function getSignature(signatureId) {
+    const signature = await db.getSignaturePic(signatureId);
+    if (!signature || signature.length === 0) {
+        throw new Error("Failed to fetch signature from the DB.");
+    }
+    return signature.rows[0].signature;
+}
+
+async function getSignatoriesCount() {
+    const signatoriesCount = await db.getSignatoriesNumber();
+    return signatoriesCount.rows[0].count;
+}
+
+async function deleteSignatureFromDB(userID) {
+    await db.deleteSignature(userID);
+}
+
 module.exports = {
     getUserByEmail,
     checkUserPassword,
     checkUserSignature,
     saveSignature,
+    getSignature,
+    getSignatoriesCount,
+    deleteSignatureFromDB,
 };
