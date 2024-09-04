@@ -57,9 +57,20 @@ module.exports.getSignatories = () => {
     );
 };
 
+module.exports.getCities = () => {
+    return db.query(
+        `SELECT DISTINCT LOWER(user_profiles.city) AS city
+         FROM user_profiles
+         INNER JOIN users ON users.id = user_profiles.user_id
+         INNER JOIN signatures ON users.id = signatures.user_id
+         WHERE user_profiles.city IS NOT NULL
+         ORDER BY city ASC`
+    );
+};
+
 module.exports.getSignatoriesByCity = (city) => {
     return db.query(
-        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures ON users.id = signatures.user_id WHERE city = LOWER($1)",
+        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures ON users.id = signatures.user_id WHERE LOWER(user_profiles.city) = LOWER('your_city_here')",
         [city]
     );
 };

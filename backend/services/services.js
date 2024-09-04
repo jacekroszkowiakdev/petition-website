@@ -48,6 +48,23 @@ async function deleteSignatureFromDB(userID) {
     await db.deleteSignature(userID);
 }
 
+async function getSignatoriesList() {
+    const signatoriesList = await db.getSignatories();
+    return signatoriesList.rows;
+}
+
+async function getAllCities() {
+    const allCities = await db.getCities();
+    return allCities.rows;
+}
+
+async function getSignatoriesByCity(city) {
+    console.log("Fetching signatories for city:", city);
+    const signatoriesListByCity = await db.getSignatoriesByCity(city);
+    console.log("Results:", signatoriesListByCity.rows);
+    return signatoriesListByCity.rows;
+}
+
 module.exports = {
     getUserByEmail,
     checkUserPassword,
@@ -55,5 +72,8 @@ module.exports = {
     saveSignature,
     getSignature,
     getSignatoriesCount,
+    getAllCities,
+    getSignatoriesList,
+    getSignatoriesByCity,
     deleteSignatureFromDB,
 };
