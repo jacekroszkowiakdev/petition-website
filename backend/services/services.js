@@ -106,7 +106,6 @@ async function addUserData(age, city, homepage, userId) {
         homepage.toLowerCase(),
         userId
     );
-
     if (!userData || userData.length === 0) {
         throw new Error("Failed to create user profile.");
     }
@@ -133,8 +132,18 @@ async function updateUserData(first, last, email, password, userId) {
     if (!updatedUserData || updatedUserData.length === 0) {
         throw new Error("Failed to update user profile.");
     }
-    console.log("User profile data:", updatedUserData.rows[0]);
-    return updatedUserData.rows[0];
+}
+
+async function updateProfileWithOldPassword(first, last, email, userId) {
+    const oldPasswordUpdate = await db.updateWithOldPassword(
+        first,
+        last,
+        email,
+        userId
+    );
+    if (!oldPasswordUpdate || oldPasswordUpdate.length === 0) {
+        throw new Error("Failed to create user profile.");
+    }
 }
 
 async function upsertUserProfile(age, city, homepage, userId) {
@@ -148,21 +157,6 @@ async function upsertUserProfile(age, city, homepage, userId) {
     if (!upsertData || upsertData.length === 0) {
         throw new Error("Failed to update user data.");
     }
-    console.log("Upsert profile data:", upsertData.rows[0]);
-    return upsertData.rows[0];
-}
-
-async function updateProfileWithOldPassword(first, last, email, userId) {
-    const oldPasswordUpdate = await db.updateWithOldPassword(
-        first,
-        last,
-        email,
-        userId
-    );
-    if (!oldPasswordUpdate || oldPasswordUpdate.length === 0) {
-        throw new Error("Failed to create user profile.");
-    }
-    return oldPasswordUpdate.rows[0];
 }
 
 module.exports = {
