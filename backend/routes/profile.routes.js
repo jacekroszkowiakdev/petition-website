@@ -54,14 +54,28 @@ router.post(
         const { age, city, homepage } = req.body;
         const userId = req.session.userId;
 
-        try {
-            await addUserData(age, city, homepage, userId);
-            res.redirect("/petition");
-        } catch (err) {
+        // Ensure homepage starts with http:// or https:// or is left empty
+        if (
+            homepage.startsWith("http://") ||
+            homepage.startsWith("https://") ||
+            homepage === ""
+        ) {
+            try {
+                await addUserData(age, city, homepage, userId);
+                res.redirect("/petition");
+            } catch (err) {
+                res.render("profile", {
+                    title: "profile",
+                    error: true,
+                    message: err.message || "Error saving user data.",
+                });
+            }
+        } else {
+            // If the homepage doesn't start with a valid protocol, show an error message
             res.render("profile", {
                 title: "profile",
                 error: true,
-                message: err.message || "Error saving user data.",
+                message: "Homepage URL must start with http:// or https://.",
             });
         }
     }

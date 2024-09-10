@@ -118,8 +118,49 @@ async function getUserData(userId) {
     if (!userData || userData.length === 0) {
         throw new Error("Failed to create user profile.");
     }
-    console.log("User profile data:", userData.rows[0]);
     return userData.rows[0];
+}
+
+// db.updateCredentials(first, last, email, hashedPassword, req.session.userId);
+
+async function updateUserData(first, last, email, password, userId) {
+    const hashedPassword = await hashPassword(password);
+    const updatedUserData = await db.updateCredentials(
+        first,
+        last,
+        email,
+        hashedPassword,
+        userId
+    );
+    if (!updatedUserData || updatedUserData.length === 0) {
+        throw new Error("Failed to update user profile.");
+    }
+    console.log("User profile data:", updatedUserData.rows[0]);
+    return updatedUserData.rows[0];
+}
+
+async function upsertUserProfile(age, city, homepage, userId) {
+    const upsertData = await db.upsertProfile(
+        age,
+        city.toLowerCase(),
+        homepage.toLowerCase(),
+        userId
+    );
+
+    if (!upsertData || upsertData.length === 0) {
+        throw new Error("Failed to update user data.");
+    }
+    console.log("Upsert profile data:", upsertData.rows[0]);
+    return upsertData.rows[0];
+}
+
+async function updateProfileWithOldPassword(first, last, email, userId) {
+    const oldPasswordUpdate = await db.updateWithOldPassword(
+        first,
+        last,
+        email,
+        userId
+    );
 }
 
 module.exports = {
@@ -136,4 +177,7 @@ module.exports = {
     registerUser,
     addUserData,
     getUserData,
+    updateUserData,
+    upsertUserProfile,
+    updateProfileWithOldPassword,
 };
