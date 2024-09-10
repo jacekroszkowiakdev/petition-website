@@ -5,8 +5,6 @@ module.exports.addSignature = (signature, userId) => {
     const q = `INSERT INTO signatures (signature, user_id)
     VALUES ($1, $2) RETURNING id`;
     const params = [signature, userId];
-    console.log("input from canvas is: ", params);
-    console.log("Signature added");
     return db.query(q, params);
 };
 
@@ -59,9 +57,24 @@ module.exports.getSignatories = () => {
     );
 };
 
+module.exports.getCities = () => {
+    return db.query(
+        `SELECT DISTINCT LOWER(user_profiles.city) AS city
+         FROM user_profiles
+         INNER JOIN users ON users.id = user_profiles.user_id
+         INNER JOIN signatures ON users.id = signatures.user_id
+         WHERE user_profiles.city IS NOT NULL
+         ORDER BY city ASC`
+    );
+};
+
 module.exports.getSignatoriesByCity = (city) => {
     return db.query(
-        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures ON users.id = signatures.user_id WHERE city = LOWER($1)",
+        `SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url
+         FROM users
+         LEFT JOIN user_profiles ON users.id = user_profiles.user_id
+         INNER JOIN signatures ON users.id = signatures.user_id
+         WHERE LOWER(user_profiles.city) = LOWER($1)`,
         [city]
     );
 };
@@ -70,14 +83,12 @@ module.exports.checkForUserEmail = (email) => {
     return db.query("SELECT password, id FROM users WHERE email = $1", [email]);
 };
 
-module.exports.checkForUserSignature = (userId) => {
-    return db.query("SELECT signature FROM signatures WHERE user_id = ($1)", [
-        userId,
-    ]);
+module.exports.checkForUserSignature = async (userId) => {
+    return db.query("SELECT id FROM signatures WHERE user_id = $1", [userId]);
 };
 
 //user_profiles table:
-module.exports.addProfile = (age, city, homepage, userId) => {
+module.exports.addProfileData = (age, city, homepage, userId) => {
     const q = `INSERT INTO user_profiles (age, city, url, user_id)
     VALUES ($1, $2, $3, $4)`;
     const params = [age || null, city, homepage, userId];
@@ -87,14 +98,14 @@ module.exports.addProfile = (age, city, homepage, userId) => {
 
 module.exports.upsertProfile = (age, city, homepage, userId) => {
     const q = `INSERT INTO user_profiles (age, city, url, user_id)
-    VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET age = $1, city = $2, url = $3`;
+    VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET age = $1, city = $2, url = $3 RETURNING *`;
     const params = [age || null, city || null, homepage || null, userId];
     console.log("Profile updated");
     return db.query(q, params);
 };
 
 //user + user_profile JOIN:
-module.exports.getCombinedUserData = (userId) => {
+module.exports.getAllUserData = (userId) => {
     return db.query(
         `SELECT users.first, users.last, users.email, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id WHERE users.id =($1)`,
         [userId]

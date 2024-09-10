@@ -8,6 +8,10 @@ const formatCityName = (city) => {
     return city.charAt(0).toUpperCase() + city.slice(1);
 };
 
+const eq = (a, b) => {
+    return a === b;
+};
+
 module.exports.setupTemplateEngine = (app) => {
     app.engine(
         "handlebars",
@@ -18,6 +22,7 @@ module.exports.setupTemplateEngine = (app) => {
             extname: "handlebars",
             helpers: {
                 formatCityName: formatCityName,
+                eq: eq,
             },
         })
     );

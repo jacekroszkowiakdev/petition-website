@@ -1,31 +1,58 @@
 <div class="modal">
     <div class="signers-container">
         {{#if city}}
-            <h2>Thanks to all people of
-                {{city}}
-                who already support this case:</h2>
+            <h2>Thanks to all people of {{city}} who already support this cause:</h2>
         {{else}}
-            <h2>Thanks to all people who already support our case:</h2>
+            <h2>Thanks to all people who already support our cause:</h2>
         {{/if}}
 
         {{#if error}}
             <h2>{{message}}</h2>
         {{/if}}
-        {{#if rows.length}}
+
+        {{#if signatoriesList.length}}
             <ul>
-                {{#each rows}}
+                {{#each signatoriesList}}
                     <li>
-                        <strong>{{first}} {{last}}</strong>, age
-                        {{age}}<br />
-                        from
-                        {{formatCityName city}}<br />
-                        <strong>website: </strong>
-                        {{#if url}}{{url}}{{else}}none{{/if}}<br />
+                        <strong>{{first}} {{last}}</strong>, age {{age}}<br />
+                        from <strong>{{formatCityName city}}</strong><br />
+                        <strong>Website:</strong>
+                        {{#if url}}<a href="{{url}}" target="_blank">{{url}}</a>{{else}}none{{/if}}<br />
                     </li>
                 {{/each}}
             </ul>
+
+            <p>Interested in which cities our supporters come from? Select a city below:</p>
+            <form id="city-form">
+                <label for="city">Choose a city:</label>
+                <select name="city" id="city" onchange="updateURL()">
+                    <option value="">Select a city</option>
+                    {{#each cities}}
+                        <option value="{{formatCityName this.city}}" {{#if (eq this.city ../city)}}selected{{/if}}>{{this.city}}</option>
+                    {{/each}}
+                </select>
+            </form>
         {{else}}
-            <p>No signers found.</p>
+            <h2>No signers found.</h2>
+            <p>Select another city:</p>
+            <form id="city-form">
+                <label for="city">Choose a city:</label>
+                <select name="city" id="city" onchange="updateURL()">
+                    <option value="">Select a city</option>
+                    {{#each cities}}
+                        <option value="{{this.city}}" {{#if (eq this.city ../city)}}selected{{/if}}>{{this.city}}</option>
+                    {{/each}}
+                </select>
+            </form>
         {{/if}}
     </div>
 </div>
+
+<script>
+function updateURL() {
+    const selectedCity = document.getElementById('city').value;
+    if (selectedCity) {
+        window.location.href = `/signers/${encodeURIComponent(selectedCity)}`;
+    }
+}
+</script>

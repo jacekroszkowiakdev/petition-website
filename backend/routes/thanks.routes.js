@@ -4,43 +4,61 @@ const {
     requireLoggedIn,
     requireSignedPetition,
 } = require("../middleware/routesLogic.middleware");
-const db = require("../db");
+const {
+    getSignature,
+    getSignatoriesCount,
+    deleteSignatureFromDB,
+} = require("../services/services");
 
 // display the thanks page
-router.get("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
-    Promise.all([
-        db.getSignaturePic(req.session.signatureId),
-        db.getSignatoriesNumber(),
-    ])
-        .then((result) => {
-            const signature = result[0].rows[0].signature;
-            const count = result[1].rows[0].count;
+router.get(
+    "/thanks",
+    requireLoggedIn,
+    requireSignedPetition,
+    async (req, res) => {
+        try {
+            const signature = await getSignature(req.session.signatureId);
+            const count = await getSignatoriesCount();
             res.render("thanks", {
                 title: "Thank you for signing",
                 count,
                 signature,
             });
-        })
-        .catch((err) => {
-            console.log("error reading data from DB : ", err);
-            res.status(500).send("Internal Server Error");
-        });
-});
+        } catch (err) {
+            console.error("Error reading data from DB: ", err);
+            res.render("thanks", {
+                title: "Thank you for signing",
+                count: err.count || 0,
+                signature: err.signature || null,
+                message:
+                    err.message || "Failed to load your signature from the DB",
+            });
+        }
+    }
+);
 
 // handle signature removal
-router.post("/thanks", requireLoggedIn, requireSignedPetition, (req, res) => {
-    db.deleteSignature(req.session.userId)
-        .then(() => {
+router.post(
+    "/thanks",
+    requireLoggedIn,
+    requireSignedPetition,
+    async (req, res) => {
+        try {
+            const count = await getSignatoriesCount();
+            await deleteSignatureFromDB(req.session.userId);
             req.session.signatureId = null;
             res.redirect("/petition");
-        })
-        .catch((err) => {
-            console.log(
-                "error while attempting to delete signature from DB",
-                err
-            );
-            res.status(500).send("Internal Server Error");
-        });
-});
+        } catch (err) {
+            console.error("Error deleting signature form DB: ", err);
+            res.render("thanks", {
+                title: "Thank you for signing",
+                count: err.count || 0,
+                message:
+                    err.message ||
+                    "Failed to delete your signature from the DB",
+            });
+        }
+    }
+);
 
 module.exports = router;

@@ -4,44 +4,70 @@ const {
     requireLoggedIn,
     requireSignedPetition,
 } = require("../middleware/routesLogic.middleware");
-const db = require("../db");
+const {
+    getSignatoriesList,
+    getSignatoriesByCity,
+    getAllCities,
+} = require("../services/services");
 
 //  all signers
-router.get("/signers", requireLoggedIn, requireSignedPetition, (req, res) => {
-    db.getSignatories()
-        .then(({ rows }) => {
+router.get(
+    "/signers",
+    requireLoggedIn,
+    requireSignedPetition,
+    async (req, res) => {
+        try {
+            const signatoriesList = await getSignatoriesList();
+            const cities = await getAllCities();
             res.render("signers", {
                 title: "Petition Signatories",
-                rows,
+                signatoriesList,
+                cities,
             });
-        })
-        .catch((err) => {
+        } catch (err) {
             console.log("Error reading signatories from DB:", err);
-            res.status(500).send("Internal Server Error");
-        });
-});
+            res.render("signers", {
+                title: "Petition Signatories",
+                message:
+                    err.message ||
+                    "Failed to load list of signatories from the DB",
+            });
+        }
+    }
+);
 
-// signers by city
 router.get(
     "/signers/:city",
     requireLoggedIn,
     requireSignedPetition,
-    (req, res) => {
+    async (req, res) => {
         const city = req.params.city;
+        try {
+            const cities = await getAllCities();
+            const signatoriesList = await getSignatoriesByCity(city);
 
-        db.getSignatoriesByCity(city)
-            .then(({ rows }) => {
-                res.render("signers", {
-                    title: `${
-                        city.charAt(0).toUpperCase() + city.slice(1)
-                    } Signatories`,
-                    rows,
-                });
-            })
-            .catch((err) => {
-                console.log("Error reading signatories by city from DB:", err);
-                res.status(500).send("Internal Server Error");
+            if (signatoriesList.length === 0) {
+                console.warn(`No signatories found for city: ${city}`);
+            }
+
+            res.render("signers", {
+                title: `${
+                    city.charAt(0).toUpperCase() + city.slice(1)
+                } Signatories`,
+                signatoriesList,
+                cities,
+                city,
             });
+        } catch (err) {
+            console.error("Error fetching signatories by city:", err);
+
+            res.render("signers", {
+                title: "Petition Signatories",
+                message:
+                    err.message ||
+                    "Failed to load list of signatories from the DB",
+            });
+        }
     }
 );
 

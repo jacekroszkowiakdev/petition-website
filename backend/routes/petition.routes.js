@@ -4,7 +4,7 @@ const {
     requireLoggedIn,
     requireUnsignedPetition,
 } = require("../middleware/routesLogic.middleware");
-const db = require("../db");
+const { saveSignature } = require("../services/services.js");
 
 router.get(
     "/petition",
@@ -21,16 +21,27 @@ router.post(
     "/petition",
     requireLoggedIn,
     requireUnsignedPetition,
-    (req, res) => {
+    async (req, res) => {
         const { signature } = req.body;
-        db.addSignature(signature, req.session.userId)
-            .then(({ rows }) => {
-                req.session.signatureId = rows[0].id;
-                res.redirect("/thanks");
-            })
-            .catch((err) => {
-                console.log("POST/petition error writing to DataBase: ", err);
+
+        try {
+            const signatureId = await saveSignature(
+                signature,
+                req.session.userId
+            );
+            req.session.signatureId = signatureId;
+            res.redirect("/thanks");
+        } catch (err) {
+            console.error("POST /petition error:", err.message);
+            res.status(500).send("Internal Server Error");
+            res.render("petition", {
+                title: "petition",
+                error: true,
+                message:
+                    err.message ||
+                    "Error occurred when writing signature to DataBase",
             });
+        }
     }
 );
 
