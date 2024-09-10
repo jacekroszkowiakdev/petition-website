@@ -121,8 +121,6 @@ async function getUserData(userId) {
     return userData.rows[0];
 }
 
-// db.updateCredentials(first, last, email, hashedPassword, req.session.userId);
-
 async function updateUserData(first, last, email, password, userId) {
     const hashedPassword = await hashPassword(password);
     const updatedUserData = await db.updateCredentials(
@@ -161,6 +159,10 @@ async function updateProfileWithOldPassword(first, last, email, userId) {
         email,
         userId
     );
+    if (!oldPasswordUpdate || oldPasswordUpdate.length === 0) {
+        throw new Error("Failed to create user profile.");
+    }
+    return oldPasswordUpdate.rows[0];
 }
 
 module.exports = {

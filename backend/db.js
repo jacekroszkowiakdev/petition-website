@@ -98,7 +98,7 @@ module.exports.addProfileData = (age, city, homepage, userId) => {
 
 module.exports.upsertProfile = (age, city, homepage, userId) => {
     const q = `INSERT INTO user_profiles (age, city, url, user_id)
-    VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET age = $1, city = $2, url = $3`;
+    VALUES ($1, $2, $3, $4) ON CONFLICT (user_id) DO UPDATE SET age = $1, city = $2, url = $3 RETURNING *`;
     const params = [age || null, city || null, homepage || null, userId];
     console.log("Profile updated");
     return db.query(q, params);

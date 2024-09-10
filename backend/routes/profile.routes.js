@@ -10,8 +10,10 @@ const {
     registerUser,
     addUserData,
     getUserData,
+    updateUserData,
+    upsertUserProfile,
+    updateProfileWithOldPassword,
 } = require("../services/services");
-const db = require("../db");
 
 // register
 router.get("/register", requireLoggedOut, (req, res) => {
@@ -31,7 +33,7 @@ router.post("/register", requireLoggedOut, async (req, res) => {
         res.redirect("/profile");
     } catch (err) {
         res.render("registration", {
-            title: "register",
+            title: "Register your profile",
             userLoggedOut: true,
             error: true,
             message: err.message || "Error creating user profile.",
@@ -42,7 +44,7 @@ router.post("/register", requireLoggedOut, async (req, res) => {
 // profile
 router.get("/profile", requireLoggedIn, requireUnsignedPetition, (req, res) => {
     res.render("profile", {
-        title: "profile",
+        title: "Register your profile",
     });
 });
 
@@ -54,7 +56,6 @@ router.post(
         const { age, city, homepage } = req.body;
         const userId = req.session.userId;
 
-        // Ensure homepage starts with http:// or https:// or is left empty
         if (
             homepage.startsWith("http://") ||
             homepage.startsWith("https://") ||
@@ -65,13 +66,12 @@ router.post(
                 res.redirect("/petition");
             } catch (err) {
                 res.render("profile", {
-                    title: "profile",
+                    title: "Register your profile",
                     error: true,
                     message: err.message || "Error saving user data.",
                 });
             }
         } else {
-            // If the homepage doesn't start with a valid protocol, show an error message
             res.render("profile", {
                 title: "profile",
                 error: true,
@@ -102,99 +102,39 @@ router.get("/edit", requireLoggedIn, async (req, res) => {
     }
 });
 
-router.post("/edit", requireLoggedIn, (req, res) => {
+router.post("/edit", requireLoggedIn, async (req, res) => {
     const { first, last, email, password, age, city, homepage } = req.body;
-    if (password !== "") {
-        hashPassword(password)
-            .then((hashedPassword) => {
-                db.updateCredentials(
-                    first,
-                    last,
-                    email,
-                    hashedPassword,
-                    req.session.userId
-                )
-                    .then(() => {
-                        if (
-                            homepage.startsWith("http://") ||
-                            homepage.startsWith("https://") ||
-                            homepage === ""
-                        ) {
-                            db.upsertProfile(
-                                age,
-                                city.toLowerCase(),
-                                homepage.toLowerCase(),
-                                req.session.userId
-                            )
-                                .then(() => {
-                                    res.redirect("/edit");
-                                })
-                                .catch((err) => {
-                                    res.render("edit", {
-                                        title: "edit",
-                                        error: true,
-                                        message:
-                                            "Something went wrong- please fill the fields again",
-                                    });
-                                });
-                        } else {
-                            res.redirect("/edit");
-                        }
-                    })
-                    .catch((err) => {
-                        res.render("edit", {
-                            title: "edit",
-                            error: true,
-                            message:
-                                "Something went wrong- please fill the fields again",
-                        });
-                    });
-            })
-            .catch((err) => {
-                res.render("edit", {
-                    title: "edit",
-                    error: true,
-                    message:
-                        "Something went wrong- please fill the fields again",
-                });
-            });
-    } else {
-        db.updateWithOldPassword(first, last, email, req.session.userId)
-            .then(() => {
-                if (
-                    homepage.startsWith("http://") ||
-                    homepage.startsWith("https://") ||
-                    homepage === ""
-                ) {
-                    db.upsertProfile(
-                        age,
-                        city.toLowerCase(),
-                        homepage.toLowerCase(),
-                        req.session.userId
-                    )
-                        .then(() => {
-                            res.redirect("/edit");
-                        })
-                        .catch((err) => {
-                            res.render("edit", {
-                                title: "edit",
-                                error: true,
-                                message:
-                                    "Something went wrong- please fill the fields again",
-                            });
-                        });
-                } else {
-                    res.redirect("/edit");
-                }
-            })
-            .catch((err) => {
-                res.render("edit", {
-                    title: "edit",
-                    error: true,
-                    message:
-                        "Something went wrong- please fill the fields again",
-                });
-            });
+    const userId = req.session.userId;
+
+    if (
+        !homepage.startsWith("http://") &&
+        !homepage.startsWith("https://") &&
+        homepage !== ""
+    ) {
+        return res.render("edit", {
+            title: "Edit your profile",
+            error: true,
+            message: "Invalid homepage URL",
+        });
+    }
+
+    try {
+        if (password) {
+            await updateUserData(first, last, email, password, userId);
+        } else {
+            await updateProfileWithOldPassword(first, last, email, userId);
+        }
+
+        await upsertUserProfile(age, city, homepage, userId);
+        res.redirect("/profile");
+    } catch (err) {
+        res.render("edit", {
+            title: "Edit your profile",
+            error: true,
+            message:
+                err.message ||
+                "Something went wrong- please fill the fields again",
+        });
     }
 });
 
