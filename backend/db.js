@@ -70,7 +70,11 @@ module.exports.getCities = () => {
 
 module.exports.getSignatoriesByCity = (city) => {
     return db.query(
-        "SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id INNER JOIN signatures ON users.id = signatures.user_id WHERE LOWER(user_profiles.city) = LOWER('your_city_here')",
+        `SELECT users.first, users.last, user_profiles.age, user_profiles.city, user_profiles.url
+         FROM users
+         LEFT JOIN user_profiles ON users.id = user_profiles.user_id
+         INNER JOIN signatures ON users.id = signatures.user_id
+         WHERE LOWER(user_profiles.city) = LOWER($1)`,
         [city]
     );
 };
@@ -84,7 +88,7 @@ module.exports.checkForUserSignature = async (userId) => {
 };
 
 //user_profiles table:
-module.exports.addProfile = (age, city, homepage, userId) => {
+module.exports.addProfileData = (age, city, homepage, userId) => {
     const q = `INSERT INTO user_profiles (age, city, url, user_id)
     VALUES ($1, $2, $3, $4)`;
     const params = [age || null, city, homepage, userId];
@@ -101,7 +105,7 @@ module.exports.upsertProfile = (age, city, homepage, userId) => {
 };
 
 //user + user_profile JOIN:
-module.exports.getCombinedUserData = (userId) => {
+module.exports.getAllUserData = (userId) => {
     return db.query(
         `SELECT users.first, users.last, users.email, user_profiles.age, user_profiles.city, user_profiles.url FROM users LEFT JOIN user_profiles ON users.id = user_profiles.user_id WHERE users.id =($1)`,
         [userId]

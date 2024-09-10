@@ -2,7 +2,7 @@
     <div class="profile-container">
         <form method="POST">
             <input type="hidden" name="_csrf" value="{{csrfToken}}" />
-            {{#rows}}
+            {{#userData}}
                 <h4>Edit your profile</h4>
 
                 <label for="first">First Name</label><br />
@@ -40,10 +40,12 @@
                 /><br />
 
                 <div class="buttons">
-                    <button class="continue"> Continue </button>
-                    <a href=""><button class="cancel">Cancel</button></a>
+                    <button class="continue"> Save Data </button>
+                    <a href="/petition"><button
+                            class="cancel"
+                        >Cancel</button></a>
                 </div>
-            {{/rows}}
+            {{/userData}}
 
         </form>
 

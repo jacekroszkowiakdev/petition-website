@@ -33,7 +33,6 @@
         buttonIsDown = false;
         dataURL = canvas.toDataURL();
         signature.value = dataURL;
-        console.log("signature.value: ", signature.value);
     });
 
     // Touch events:
@@ -64,6 +63,5 @@
         buttonIsDown = false;
         dataURL = canvas.toDataURL();
         signature.value = dataURL;
-        console.log("signature.value: ", signature.value);
     });
 })();

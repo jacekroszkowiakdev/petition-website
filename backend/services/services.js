@@ -1,5 +1,7 @@
-// Services contain the business logic and interact with data.
-const { comparePasswords } = require("../utils/passwordUtils/bcrypt");
+const {
+    comparePasswords,
+    hashPassword,
+} = require("../utils/passwordUtils/bcrypt");
 const db = require("../db");
 
 async function getUserByEmail(email) {
@@ -20,6 +22,9 @@ async function checkUserPassword(user, password) {
 
 async function checkUserSignature(userId) {
     const { rows } = await db.checkForUserSignature(userId);
+    if (rows.length === 0) {
+        throw new Error("User signature not found");
+    }
     return rows;
 }
 
@@ -33,7 +38,7 @@ async function saveSignature(signature, userId) {
 
 async function getSignature(signatureId) {
     const signature = await db.getSignaturePic(signatureId);
-    if (!signature || signature.length === 0) {
+    if (!signature || signature.rows.length === 0) {
         throw new Error("Failed to fetch signature from the DB.");
     }
     return signature.rows[0].signature;
@@ -41,28 +46,80 @@ async function getSignature(signatureId) {
 
 async function getSignatoriesCount() {
     const signatoriesCount = await db.getSignatoriesNumber();
+    if (!signatoriesCount || signatoriesCount.rows.length === 0) {
+        throw new Error("Failed to retrieve signatories count.");
+    }
     return signatoriesCount.rows[0].count;
 }
 
 async function deleteSignatureFromDB(userID) {
-    await db.deleteSignature(userID);
+    const result = await db.deleteSignature(userID);
+    if (!result || result.rowCount === 0) {
+        throw new Error("Failed to delete signature.");
+    }
 }
 
 async function getSignatoriesList() {
     const signatoriesList = await db.getSignatories();
+    if (!signatoriesList || signatoriesList.rows.length === 0) {
+        throw new Error("No signatories found.");
+    }
     return signatoriesList.rows;
 }
 
 async function getAllCities() {
     const allCities = await db.getCities();
+    if (!allCities || allCities.rows.length === 0) {
+        throw new Error("No cities found.");
+    }
     return allCities.rows;
 }
 
 async function getSignatoriesByCity(city) {
-    console.log("Fetching signatories for city:", city);
     const signatoriesListByCity = await db.getSignatoriesByCity(city);
-    console.log("Results:", signatoriesListByCity.rows);
+    if (!signatoriesListByCity || signatoriesListByCity.rows.length === 0) {
+        throw new Error(`No signatories found for city: ${city}`);
+    }
     return signatoriesListByCity.rows;
+}
+
+async function registerUser(first, last, email, password, userId) {
+    const hashedPassword = await hashPassword(password);
+    const userCredentials = await db.addCredentials(
+        first,
+        last,
+        email,
+        hashedPassword,
+        userId
+    );
+
+    if (!userCredentials || userCredentials.length === 0) {
+        throw new Error("Failed to create user profile.");
+    }
+    return userCredentials.rows[0];
+}
+
+async function addUserData(age, city, homepage, userId) {
+    const userData = await db.addProfileData(
+        age,
+        city.toLowerCase(),
+        homepage.toLowerCase(),
+        userId
+    );
+
+    if (!userData || userData.length === 0) {
+        throw new Error("Failed to create user profile.");
+    }
+    return userData.rows[0];
+}
+
+async function getUserData(userId) {
+    const userData = await db.getAllUserData(userId);
+    if (!userData || userData.length === 0) {
+        throw new Error("Failed to create user profile.");
+    }
+    console.log("User profile data:", userData.rows[0]);
+    return userData.rows[0];
 }
 
 module.exports = {
@@ -76,4 +133,7 @@ module.exports = {
     getSignatoriesList,
     getSignatoriesByCity,
     deleteSignatureFromDB,
+    registerUser,
+    addUserData,
+    getUserData,
 };

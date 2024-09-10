@@ -6,6 +6,11 @@ const {
     requireUnsignedPetition,
 } = require("../middleware/routesLogic.middleware");
 const { hashPassword } = require("../utils/passwordUtils/bcrypt");
+const {
+    registerUser,
+    addUserData,
+    getUserData,
+} = require("../services/services");
 const db = require("../db");
 
 // register
@@ -16,39 +21,22 @@ router.get("/register", requireLoggedOut, (req, res) => {
     });
 });
 
-router.post("/register", requireLoggedOut, (req, res) => {
+router.post("/register", requireLoggedOut, async (req, res) => {
     const { first, last, email, password } = req.body;
-    hashPassword(password)
-        .then((hashedPassword) => {
-            db.addCredentials(
-                first,
-                last,
-                email,
-                hashedPassword,
-                req.session.userId
-            )
-                .then(({ rows }) => {
-                    req.session.userId = rows[0].id;
-                    req.session.name = rows[0].first;
-                    res.redirect("/profile");
-                })
-                .catch((err) => {
-                    res.render("registration", {
-                        title: "register",
-                        userLoggedOut: true,
-                        error: true,
-                        message: "Error creating user profile.",
-                    });
-                });
-        })
-        .catch((err) => {
-            res.render("registration", {
-                title: "register",
-                userLoggedOut: true,
-                error: true,
-                message: "Error creating user profile.",
-            });
+
+    try {
+        const user = await registerUser(first, last, email, password);
+        req.session.userId = user.id;
+        req.session.name = user.first;
+        res.redirect("/profile");
+    } catch (err) {
+        res.render("registration", {
+            title: "register",
+            userLoggedOut: true,
+            error: true,
+            message: err.message || "Error creating user profile.",
         });
+    }
 });
 
 // profile
@@ -62,52 +50,42 @@ router.post(
     "/profile",
     requireLoggedIn,
     requireUnsignedPetition,
-    (req, res) => {
+    async (req, res) => {
         const { age, city, homepage } = req.body;
-        if (
-            homepage.startsWith("http://") ||
-            homepage.startsWith("https://") ||
-            homepage === ""
-        ) {
-            db.addProfile(
-                age,
-                city.toLowerCase(),
-                homepage.toLowerCase(),
-                req.session.userId,
-                console.log("req.session.userId: ", req.session.userId)
-            )
-                .then(() => {
-                    res.redirect("/petition");
-                })
-                .catch((err) => {
-                    res.render("profile", {
-                        title: "profile",
-                        error: true,
-                        message: "Something went wrong, please try again.",
-                    });
-                });
-        } else {
+        const userId = req.session.userId;
+
+        try {
+            await addUserData(age, city, homepage, userId);
+            res.redirect("/petition");
+        } catch (err) {
             res.render("profile", {
                 title: "profile",
-                message: "Please fill the fields again",
+                error: true,
+                message: err.message || "Error saving user data.",
             });
         }
     }
 );
 
-// edit profile
-router.get("/edit", requireLoggedIn, (req, res) => {
-    db.getCombinedUserData(req.session.userId)
-        .then(({ rows }) => {
-            res.render("edit", {
-                title: "Edit your profile",
-                rows,
-                name: req.session.name,
-            });
-        })
-        .catch((err) => {
-            res.status(500).send("Internal Server Error");
+// edit
+router.get("/edit", requireLoggedIn, async (req, res) => {
+    const userId = req.session.userId;
+    const userName = req.session.name;
+
+    try {
+        const userData = await getUserData(userId);
+        res.render("edit", {
+            title: "Edit your profile",
+            userData,
+            name: userName,
         });
+    } catch (err) {
+        res.render("edit", {
+            title: "Edit your profile",
+            error: true,
+            message: err.message || "Error fetching user data.",
+        });
+    }
 });
 
 router.post("/edit", requireLoggedIn, (req, res) => {

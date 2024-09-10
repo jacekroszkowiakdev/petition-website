@@ -23,7 +23,6 @@ router.post("/login", requireLoggedOut, async (req, res) => {
 
     try {
         const getPasswordByEmail = await getUserByEmail(email);
-        console.log("user", getPasswordByEmail);
 
         if (getPasswordByEmail.length === 0) {
             throw new Error("No user found with that email.");
